@@ -3,7 +3,7 @@ import 'package:provider/provider.dart';
 import '../providers/adhkar_provider.dart';
 import '../theme/app_colors.dart';
 import '../widgets/dhikr_card.dart';
-import '../widgets/ornament_placeholder.dart';
+import '../widgets/diamond_divider.dart';
 import 'hadith_detail_screen.dart';
 
 class AdhkarListScreen extends StatelessWidget {
@@ -29,159 +29,205 @@ class AdhkarListScreen extends StatelessWidget {
 
           return Scaffold(
             backgroundColor: AppColors.beigeLight,
-            appBar: AppBar(
-              title: Text(category.title),
-              backgroundColor: AppColors.brown,
-              foregroundColor: AppColors.white,
-              centerTitle: true,
-              actions: [
-                IconButton(
-                  icon: const Icon(Icons.refresh),
-                  tooltip: 'إعادة العدادات',
-                  onPressed: () {
-                    showDialog(
-                      context: context,
-                      builder: (ctx) => Directionality(
-                        textDirection: TextDirection.rtl,
-                        child: AlertDialog(
-                          title: const Text(
-                            'إعادة العدادات',
-                            textAlign: TextAlign.right,
+            body: CustomScrollView(
+              slivers: [
+                // ── Styled app bar ──
+                SliverAppBar(
+                  expandedHeight: 120,
+                  floating: false,
+                  pinned: true,
+                  backgroundColor: AppColors.brown,
+                  foregroundColor: AppColors.white,
+                  centerTitle: true,
+                  actions: [
+                    IconButton(
+                      icon: const Icon(Icons.refresh_rounded, size: 22),
+                      tooltip: 'إعادة العدادات',
+                      onPressed: () {
+                        showDialog(
+                          context: context,
+                          builder: (ctx) => Directionality(
                             textDirection: TextDirection.rtl,
-                          ),
-                          content: const Text(
-                            'هل تريد إعادة جميع العدادات في هذا القسم؟',
-                            textAlign: TextAlign.right,
-                            textDirection: TextDirection.rtl,
-                          ),
-                          actions: [
-                            TextButton(
-                              onPressed: () => Navigator.pop(ctx),
-                              child: const Text('إلغاء'),
+                            child: AlertDialog(
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(16),
+                              ),
+                              title: const Text(
+                                'إعادة العدادات',
+                                textAlign: TextAlign.right,
+                                textDirection: TextDirection.rtl,
+                                style: TextStyle(fontFamily: 'Amiri'),
+                              ),
+                              content: const Text(
+                                'هل تريد إعادة جميع العدادات في هذا القسم؟',
+                                textAlign: TextAlign.right,
+                                textDirection: TextDirection.rtl,
+                                style: TextStyle(fontFamily: 'Amiri'),
+                              ),
+                              actions: [
+                                TextButton(
+                                  onPressed: () => Navigator.pop(ctx),
+                                  child: const Text(
+                                    'إلغاء',
+                                    style: TextStyle(fontFamily: 'Amiri'),
+                                  ),
+                                ),
+                                TextButton(
+                                  onPressed: () {
+                                    provider.resetCategory(categoryId);
+                                    Navigator.pop(ctx);
+                                  },
+                                  child: const Text(
+                                    'إعادة',
+                                    style: TextStyle(
+                                      fontFamily: 'Amiri',
+                                      color: AppColors.gold,
+                                    ),
+                                  ),
+                                ),
+                              ],
                             ),
-                            TextButton(
-                              onPressed: () {
-                                provider.resetCategory(categoryId);
-                                Navigator.pop(ctx);
-                              },
-                              child: const Text('إعادة'),
-                            ),
-                          ],
-                        ),
+                          ),
+                        );
+                      },
+                    ),
+                  ],
+                  flexibleSpace: FlexibleSpaceBar(
+                    centerTitle: true,
+                    title: Text(
+                      category.title,
+                      style: const TextStyle(
+                        fontFamily: 'Amiri',
+                        fontSize: 20,
+                        fontWeight: FontWeight.w700,
+                        color: AppColors.white,
                       ),
-                    );
-                  },
-                ),
-              ],
-            ),
-            body: Column(
-              children: [
-                // Progress header
-                Container(
-                  width: double.infinity,
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 20,
-                    vertical: 14,
-                  ),
-                  decoration: BoxDecoration(
-                    gradient: AppColors.headerGradient,
-                    boxShadow: [
-                      BoxShadow(
-                        color: AppColors.brown.withValues(alpha: 0.2),
-                        blurRadius: 8,
-                        offset: const Offset(0, 2),
+                    ),
+                    background: Container(
+                      decoration: const BoxDecoration(
+                        gradient: AppColors.headerGradient,
                       ),
-                    ],
-                  ),
-                  child: Row(
-                    textDirection: TextDirection.rtl,
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
+                      child: Align(
+                        alignment: Alignment.bottomCenter,
+                        child: Padding(
+                          padding: const EdgeInsets.only(bottom: 52),
+                          child: Text(
                             category.subtitle,
                             textDirection: TextDirection.rtl,
                             style: TextStyle(
                               fontFamily: 'Amiri',
-                              fontSize: 14,
-                              color: AppColors.white.withValues(alpha: 0.8),
+                              fontSize: 13,
+                              color:
+                                  AppColors.white.withValues(alpha: 0.6),
                             ),
                           ),
-                          const SizedBox(height: 4),
-                          Text(
-                            '${category.completedCount} من ${category.totalCount} أذكار',
-                            textDirection: TextDirection.rtl,
-                            style: const TextStyle(
-                              fontFamily: 'Amiri',
-                              fontSize: 16,
-                              fontWeight: FontWeight.w700,
-                              color: AppColors.gold,
-                            ),
-                          ),
-                        ],
-                      ),
-                      // Mini circular progress
-                      SizedBox(
-                        width: 48,
-                        height: 48,
-                        child: Stack(
-                          alignment: Alignment.center,
-                          children: [
-                            CircularProgressIndicator(
-                              value: category.progress,
-                              strokeWidth: 4,
-                              backgroundColor:
-                                  AppColors.white.withValues(alpha: 0.15),
-                              valueColor:
-                                  const AlwaysStoppedAnimation<Color>(
-                                AppColors.gold,
-                              ),
-                              strokeCap: StrokeCap.round,
-                            ),
-                            Text(
-                              '${(category.progress * 100).toInt()}%',
-                              style: const TextStyle(
-                                fontFamily: 'Amiri',
-                                fontSize: 11,
-                                fontWeight: FontWeight.w700,
-                                color: AppColors.gold,
-                              ),
-                            ),
-                          ],
                         ),
                       ),
-                    ],
+                    ),
                   ),
                 ),
 
-                // Adhkar list
-                Expanded(
-                  child: ListView.separated(
-                    padding: const EdgeInsets.symmetric(vertical: 12),
-                    itemCount: category.adhkar.length,
-                    separatorBuilder: (_, __) => const Center(
-                      child: OrnamentPlaceholder(type: OrnamentType.divider),
+                // ── Progress bar strip ──
+                SliverToBoxAdapter(
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 24,
+                      vertical: 14,
                     ),
-                    itemBuilder: (context, index) {
-                      final dhikr = category.adhkar[index];
-                      return DhikrCard(
-                        dhikr: dhikr,
-                        onCounterTap: () {
-                          provider.incrementDhikr(categoryId, dhikr.id);
-                        },
-                        onInfoTap: () {
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (_) =>
-                                  HadithDetailScreen(dhikr: dhikr),
+                    decoration: BoxDecoration(
+                      color: AppColors.beigeWarm,
+                      boxShadow: [
+                        BoxShadow(
+                          color: AppColors.brown.withValues(alpha: 0.06),
+                          blurRadius: 4,
+                          offset: const Offset(0, 2),
+                        ),
+                      ],
+                    ),
+                    child: Row(
+                      textDirection: TextDirection.rtl,
+                      children: [
+                        Text(
+                          '${category.completedCount} من ${category.totalCount}',
+                          textDirection: TextDirection.rtl,
+                          style: const TextStyle(
+                            fontFamily: 'Amiri',
+                            fontSize: 14,
+                            fontWeight: FontWeight.w700,
+                            color: AppColors.brownLight,
+                          ),
+                        ),
+                        const SizedBox(width: 12),
+                        Expanded(
+                          child: ClipRRect(
+                            borderRadius: BorderRadius.circular(4),
+                            child: LinearProgressIndicator(
+                              value: category.progress,
+                              minHeight: 6,
+                              backgroundColor: AppColors.beigeDark,
+                              valueColor: AlwaysStoppedAnimation<Color>(
+                                category.isAllCompleted
+                                    ? AppColors.counterCompleted
+                                    : AppColors.gold,
+                              ),
                             ),
-                          );
-                        },
-                      );
+                          ),
+                        ),
+                        const SizedBox(width: 12),
+                        Text(
+                          '${(category.progress * 100).toInt()}%',
+                          textDirection: TextDirection.ltr,
+                          style: TextStyle(
+                            fontFamily: 'Amiri',
+                            fontSize: 14,
+                            fontWeight: FontWeight.w700,
+                            color: category.isAllCompleted
+                                ? AppColors.counterCompleted
+                                : AppColors.gold,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+
+                // ── Adhkar list with diamond dividers ──
+                SliverList(
+                  delegate: SliverChildBuilderDelegate(
+                    (context, index) {
+                      // Interleave cards and dividers
+                      final itemIndex = index ~/ 2;
+                      if (index.isEven) {
+                        final dhikr = category.adhkar[itemIndex];
+                        return Padding(
+                          padding: EdgeInsets.only(
+                            top: itemIndex == 0 ? 16 : 0,
+                            bottom: itemIndex == category.adhkar.length - 1
+                                ? 32
+                                : 0,
+                          ),
+                          child: DhikrCard(
+                            dhikr: dhikr,
+                            onCounterTap: () {
+                              provider.incrementDhikr(
+                                  categoryId, dhikr.id);
+                            },
+                            onInfoTap: () {
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (_) =>
+                                      HadithDetailScreen(dhikr: dhikr),
+                                ),
+                              );
+                            },
+                          ),
+                        );
+                      } else {
+                        return const DiamondDivider();
+                      }
                     },
+                    childCount: category.adhkar.length * 2 - 1,
                   ),
                 ),
               ],

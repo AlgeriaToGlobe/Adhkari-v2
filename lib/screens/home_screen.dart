@@ -2,8 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../providers/adhkar_provider.dart';
 import '../theme/app_colors.dart';
-import '../widgets/category_card.dart';
-import '../widgets/ornament_placeholder.dart';
+import '../widgets/arch_header.dart';
+import '../widgets/diamond_divider.dart';
 import '../widgets/progress_indicator_widget.dart';
 import 'adhkar_list_screen.dart';
 import 'free_dhikr_screen.dart';
@@ -12,152 +12,152 @@ import 'settings_screen.dart';
 class HomeScreen extends StatelessWidget {
   const HomeScreen({super.key});
 
+  static const List<_FeatureItem> _features = [
+    _FeatureItem(
+      id: 'morning',
+      title: 'أذكار الصباح',
+      icon: Icons.wb_sunny_outlined,
+    ),
+    _FeatureItem(
+      id: 'evening',
+      title: 'أذكار المساء',
+      icon: Icons.nightlight_outlined,
+    ),
+    _FeatureItem(
+      id: 'sleep',
+      title: 'أذكار النوم',
+      icon: Icons.bedtime_outlined,
+    ),
+    _FeatureItem(
+      id: 'wakeup',
+      title: 'أذكار الاستيقاظ',
+      icon: Icons.alarm_outlined,
+    ),
+    _FeatureItem(
+      id: 'afterSalah',
+      title: 'أذكار بعد الصلاة',
+      icon: Icons.mosque_outlined,
+    ),
+    _FeatureItem(
+      id: 'free',
+      title: 'التسبيح الحر',
+      icon: Icons.touch_app_outlined,
+    ),
+  ];
+
   @override
   Widget build(BuildContext context) {
     return Directionality(
       textDirection: TextDirection.rtl,
       child: Scaffold(
+        backgroundColor: AppColors.beigeLight,
         body: Consumer<AdhkarProvider>(
           builder: (context, provider, _) {
-            return CustomScrollView(
-              slivers: [
-                // App bar
-                SliverAppBar(
-                  expandedHeight: 160,
-                  floating: false,
-                  pinned: true,
-                  backgroundColor: AppColors.brown,
-                  actions: [
-                    IconButton(
-                      icon: const Icon(Icons.settings_outlined),
-                      color: AppColors.white,
-                      onPressed: () {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (_) => const SettingsScreen(),
+            return SingleChildScrollView(
+              child: Column(
+                children: [
+                  // ── Arch header with title ──
+                  Stack(
+                    children: [
+                      const ArchHeader(
+                        title: 'أذكاري',
+                        subtitle: 'حصّن يومك بذكر الله',
+                      ),
+                      // Settings button
+                      Positioned(
+                        top: 0,
+                        left: 0,
+                        child: SafeArea(
+                          child: IconButton(
+                            icon: Icon(
+                              Icons.settings_outlined,
+                              color: AppColors.white.withValues(alpha: 0.7),
+                              size: 22,
+                            ),
+                            onPressed: () {
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (_) => const SettingsScreen(),
+                                ),
+                              );
+                            },
                           ),
-                        );
-                      },
-                    ),
-                  ],
-                  flexibleSpace: FlexibleSpaceBar(
-                    centerTitle: true,
-                    title: const Text(
-                      'أذكاري',
-                      style: TextStyle(
-                        fontFamily: 'Amiri',
-                        fontSize: 24,
-                        fontWeight: FontWeight.w700,
-                        color: AppColors.white,
+                        ),
                       ),
-                    ),
-                    background: Container(
-                      decoration: const BoxDecoration(
-                        gradient: AppColors.headerGradient,
-                      ),
-                      child: Column(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          const SizedBox(height: 20),
-                          // ── ORNAMENT PLACEHOLDER: Header decoration ──
-                          const OrnamentPlaceholder(
-                            type: OrnamentType.header,
-                            borderColor: AppColors.goldLight,
-                          ),
-                        ],
-                      ),
-                    ),
+                    ],
                   ),
-                ),
 
-                // Daily progress
-                SliverToBoxAdapter(
-                  child: Padding(
-                    padding: const EdgeInsets.only(top: 16),
+                  // ── Daily progress widget ──
+                  Transform.translate(
+                    offset: const Offset(0, -20),
                     child: DailyProgressWidget(
                       progress: provider.overallProgress,
                       completed: provider.completedAdhkar,
                       total: provider.totalAdhkar,
                     ),
                   ),
-                ),
 
-                // Section title
-                const SliverToBoxAdapter(
-                  child: Padding(
-                    padding: EdgeInsets.fromLTRB(16, 24, 16, 8),
-                    child: Text(
-                      'الأذكار',
-                      textAlign: TextAlign.right,
-                      textDirection: TextDirection.rtl,
-                      style: TextStyle(
-                        fontFamily: 'Amiri',
-                        fontSize: 22,
-                        fontWeight: FontWeight.w700,
-                        color: AppColors.textPrimary,
+                  // ── Diamond divider ──
+                  const DiamondDivider(),
+
+                  // ── Feature grid (2 columns) ──
+                  Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 20),
+                    child: GridView.builder(
+                      shrinkWrap: true,
+                      physics: const NeverScrollableScrollPhysics(),
+                      gridDelegate:
+                          const SliverGridDelegateWithFixedCrossAxisCount(
+                        crossAxisCount: 2,
+                        mainAxisSpacing: 14,
+                        crossAxisSpacing: 14,
+                        childAspectRatio: 1.35,
                       ),
-                    ),
-                  ),
-                ),
+                      itemCount: _features.length,
+                      itemBuilder: (context, index) {
+                        final feature = _features[index];
+                        // Calculate progress for this category
+                        final category =
+                            provider.getCategoryById(feature.id);
+                        final progress = category?.progress ?? 0.0;
+                        final isCompleted =
+                            category?.isAllCompleted ?? false;
 
-                // Category list
-                SliverList(
-                  delegate: SliverChildBuilderDelegate(
-                    (context, index) {
-                      final category = provider.categories[index];
-                      return CategoryCard(
-                        category: category,
-                        onTap: () {
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (_) => AdhkarListScreen(
-                                categoryId: category.id,
-                              ),
-                            ),
-                          );
-                        },
-                      );
-                    },
-                    childCount: provider.categories.length,
-                  ),
-                ),
-
-                // ── ORNAMENT PLACEHOLDER: Divider between sections ──
-                const SliverToBoxAdapter(
-                  child: Center(
-                    child: Padding(
-                      padding: EdgeInsets.symmetric(vertical: 8),
-                      child: OrnamentPlaceholder(type: OrnamentType.divider),
-                    ),
-                  ),
-                ),
-
-                // Free Dhikr button
-                SliverToBoxAdapter(
-                  child: Padding(
-                    padding: const EdgeInsets.fromLTRB(16, 8, 16, 8),
-                    child: _FreeDhikrButton(
-                      count: provider.freeDhikrCount,
-                      label: provider.freeDhikrLabel,
-                      onTap: () {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (_) => const FreeDhikrScreen(),
-                          ),
+                        return _FeatureCard(
+                          title: feature.title,
+                          icon: feature.icon,
+                          progress: progress,
+                          isCompleted: isCompleted,
+                          isFreeMode: feature.id == 'free',
+                          onTap: () {
+                            if (feature.id == 'free') {
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (_) =>
+                                      const FreeDhikrScreen(),
+                                ),
+                              );
+                            } else {
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (_) => AdhkarListScreen(
+                                    categoryId: feature.id,
+                                  ),
+                                ),
+                              );
+                            }
+                          },
                         );
                       },
                     ),
                   ),
-                ),
 
-                // Bottom padding
-                const SliverToBoxAdapter(
-                  child: SizedBox(height: 32),
-                ),
-              ],
+                  const SizedBox(height: 32),
+                ],
+              ),
             );
           },
         ),
@@ -166,14 +166,32 @@ class HomeScreen extends StatelessWidget {
   }
 }
 
-class _FreeDhikrButton extends StatelessWidget {
-  final int count;
-  final String label;
+class _FeatureItem {
+  final String id;
+  final String title;
+  final IconData icon;
+
+  const _FeatureItem({
+    required this.id,
+    required this.title,
+    required this.icon,
+  });
+}
+
+class _FeatureCard extends StatelessWidget {
+  final String title;
+  final IconData icon;
+  final double progress;
+  final bool isCompleted;
+  final bool isFreeMode;
   final VoidCallback onTap;
 
-  const _FreeDhikrButton({
-    required this.count,
-    required this.label,
+  const _FeatureCard({
+    required this.title,
+    required this.icon,
+    required this.progress,
+    required this.isCompleted,
+    required this.isFreeMode,
     required this.onTap,
   });
 
@@ -182,70 +200,85 @@ class _FreeDhikrButton extends StatelessWidget {
     return GestureDetector(
       onTap: onTap,
       child: Container(
-        padding: const EdgeInsets.all(16),
         decoration: BoxDecoration(
-          gradient: const LinearGradient(
-            colors: [AppColors.gold, AppColors.goldLight],
-            begin: Alignment.centerRight,
-            end: Alignment.centerLeft,
+          color: AppColors.cardBackground,
+          borderRadius: BorderRadius.circular(18),
+          border: Border.all(
+            color: isCompleted
+                ? AppColors.counterCompleted.withValues(alpha: 0.3)
+                : AppColors.divider.withValues(alpha: 0.5),
           ),
-          borderRadius: BorderRadius.circular(16),
           boxShadow: [
             BoxShadow(
-              color: AppColors.gold.withValues(alpha: 0.3),
+              color: AppColors.brown.withValues(alpha: 0.04),
               blurRadius: 10,
-              offset: const Offset(0, 4),
+              offset: const Offset(0, 3),
             ),
           ],
         ),
-        child: Row(
-          textDirection: TextDirection.rtl,
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
           children: [
+            // Icon in a gold circle
             Container(
               width: 48,
               height: 48,
               decoration: BoxDecoration(
-                color: AppColors.white.withValues(alpha: 0.25),
-                borderRadius: BorderRadius.circular(12),
+                shape: BoxShape.circle,
+                color: isCompleted
+                    ? AppColors.counterCompleted.withValues(alpha: 0.1)
+                    : isFreeMode
+                        ? AppColors.gold.withValues(alpha: 0.15)
+                        : AppColors.gold.withValues(alpha: 0.08),
+                border: Border.all(
+                  color: isCompleted
+                      ? AppColors.counterCompleted.withValues(alpha: 0.3)
+                      : AppColors.gold.withValues(alpha: 0.25),
+                  width: 1.5,
+                ),
               ),
-              child: const Icon(
-                Icons.touch_app,
-                color: AppColors.brownDark,
-                size: 26,
+              child: Icon(
+                isCompleted ? Icons.check : icon,
+                size: 22,
+                color: isCompleted
+                    ? AppColors.counterCompleted
+                    : AppColors.gold,
               ),
             ),
-            const SizedBox(width: 14),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  const Text(
-                    'التسبيح الحر',
-                    textAlign: TextAlign.right,
-                    textDirection: TextDirection.rtl,
-                    style: TextStyle(
-                      fontFamily: 'Amiri',
-                      fontSize: 18,
-                      fontWeight: FontWeight.w700,
-                      color: AppColors.brownDark,
+            const SizedBox(height: 10),
+            // Title
+            Text(
+              title,
+              textAlign: TextAlign.center,
+              textDirection: TextDirection.rtl,
+              style: const TextStyle(
+                fontFamily: 'Amiri',
+                fontSize: 15,
+                fontWeight: FontWeight.w700,
+                color: AppColors.textPrimary,
+                height: 1.3,
+              ),
+            ),
+            // Mini progress bar (not for free mode)
+            if (!isFreeMode && progress > 0) ...[
+              const SizedBox(height: 8),
+              SizedBox(
+                width: 60,
+                child: ClipRRect(
+                  borderRadius: BorderRadius.circular(2),
+                  child: LinearProgressIndicator(
+                    value: progress,
+                    minHeight: 3,
+                    backgroundColor: AppColors.beigeDark,
+                    valueColor: AlwaysStoppedAnimation<Color>(
+                      isCompleted
+                          ? AppColors.counterCompleted
+                          : AppColors.gold,
                     ),
                   ),
-                  Text(
-                    '$label • $count',
-                    textDirection: TextDirection.rtl,
-                    style: TextStyle(
-                      fontFamily: 'Amiri',
-                      fontSize: 14,
-                      color: AppColors.brownDark.withValues(alpha: 0.7),
-                    ),
-                  ),
-                ],
+                ),
               ),
-            ),
-            Icon(
-              Icons.chevron_left,
-              color: AppColors.brownDark.withValues(alpha: 0.5),
-            ),
+            ],
           ],
         ),
       ),
