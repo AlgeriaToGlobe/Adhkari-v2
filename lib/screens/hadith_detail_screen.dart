@@ -1,0 +1,208 @@
+import 'package:flutter/material.dart';
+import '../models/dhikr.dart';
+import '../theme/app_colors.dart';
+
+class HadithDetailScreen extends StatelessWidget {
+  final Dhikr dhikr;
+
+  const HadithDetailScreen({
+    super.key,
+    required this.dhikr,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Directionality(
+      textDirection: TextDirection.rtl,
+      child: Scaffold(
+        backgroundColor: AppColors.beigeLight,
+        appBar: AppBar(
+          title: const Text('تخريج الحديث'),
+          backgroundColor: AppColors.brown,
+          foregroundColor: AppColors.white,
+          centerTitle: true,
+        ),
+        body: SingleChildScrollView(
+          padding: const EdgeInsets.all(20),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              // Dhikr text
+              Container(
+                padding: const EdgeInsets.all(20),
+                decoration: BoxDecoration(
+                  color: AppColors.cardBackground,
+                  borderRadius: BorderRadius.circular(16),
+                  border: Border.all(color: AppColors.divider),
+                  boxShadow: [
+                    BoxShadow(
+                      color: AppColors.brown.withValues(alpha: 0.05),
+                      blurRadius: 8,
+                      offset: const Offset(0, 2),
+                    ),
+                  ],
+                ),
+                child: Text(
+                  dhikr.text,
+                  textAlign: TextAlign.right,
+                  textDirection: TextDirection.rtl,
+                  style: const TextStyle(
+                    fontFamily: 'Amiri',
+                    fontSize: 22,
+                    fontWeight: FontWeight.w400,
+                    color: AppColors.textPrimary,
+                    height: 2.0,
+                  ),
+                ),
+              ),
+
+              const SizedBox(height: 20),
+
+              // Info sections
+              _InfoSection(
+                title: 'عدد التكرار',
+                content: '${dhikr.targetCount} ${dhikr.targetCount == 1 ? "مرة" : "مرات"}',
+                icon: Icons.repeat,
+              ),
+
+              if (dhikr.fadl != null)
+                _InfoSection(
+                  title: 'الفضل',
+                  content: dhikr.fadl!,
+                  icon: Icons.star_outline,
+                ),
+
+              if (dhikr.reference != null)
+                _InfoSection(
+                  title: 'التخريج',
+                  content: dhikr.reference!,
+                  icon: Icons.menu_book_outlined,
+                ),
+
+              _InfoSection(
+                title: 'درجة الحديث',
+                content: dhikr.grade.arabicLabel,
+                icon: Icons.verified_outlined,
+                trailing: _buildGradeBadge(),
+              ),
+
+              if (dhikr.notes != null)
+                _InfoSection(
+                  title: 'ملاحظات',
+                  content: dhikr.notes!,
+                  icon: Icons.note_outlined,
+                ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildGradeBadge() {
+    Color bgColor;
+    Color textColor;
+
+    switch (dhikr.grade) {
+      case HadithGrade.sahih:
+      case HadithGrade.mutawatir:
+        bgColor = AppColors.counterCompleted.withValues(alpha: 0.15);
+        textColor = AppColors.counterCompleted;
+        break;
+      case HadithGrade.hasan:
+        bgColor = AppColors.gold.withValues(alpha: 0.15);
+        textColor = AppColors.goldDark;
+        break;
+      case HadithGrade.daif:
+        bgColor = AppColors.brownLight.withValues(alpha: 0.15);
+        textColor = AppColors.brownLight;
+        break;
+      case HadithGrade.mawdu:
+        bgColor = Colors.red.withValues(alpha: 0.1);
+        textColor = Colors.red.shade700;
+        break;
+    }
+
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+      decoration: BoxDecoration(
+        color: bgColor,
+        borderRadius: BorderRadius.circular(8),
+      ),
+      child: Text(
+        dhikr.grade.arabicLabel,
+        style: TextStyle(
+          fontFamily: 'Amiri',
+          fontSize: 14,
+          fontWeight: FontWeight.w700,
+          color: textColor,
+        ),
+      ),
+    );
+  }
+}
+
+class _InfoSection extends StatelessWidget {
+  final String title;
+  final String content;
+  final IconData icon;
+  final Widget? trailing;
+
+  const _InfoSection({
+    required this.title,
+    required this.content,
+    required this.icon,
+    this.trailing,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      margin: const EdgeInsets.only(bottom: 12),
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: AppColors.cardBackground,
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: AppColors.divider),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            textDirection: TextDirection.rtl,
+            children: [
+              Icon(icon, size: 20, color: AppColors.gold),
+              const SizedBox(width: 8),
+              Text(
+                title,
+                textDirection: TextDirection.rtl,
+                style: const TextStyle(
+                  fontFamily: 'Amiri',
+                  fontSize: 16,
+                  fontWeight: FontWeight.w700,
+                  color: AppColors.gold,
+                ),
+              ),
+              if (trailing != null) ...[
+                const Spacer(),
+                trailing!,
+              ],
+            ],
+          ),
+          const SizedBox(height: 8),
+          Text(
+            content,
+            textAlign: TextAlign.right,
+            textDirection: TextDirection.rtl,
+            style: const TextStyle(
+              fontFamily: 'Amiri',
+              fontSize: 16,
+              color: AppColors.textPrimary,
+              height: 1.7,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
