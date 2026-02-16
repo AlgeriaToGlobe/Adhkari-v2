@@ -167,11 +167,11 @@ class _SettingsScreenState extends State<SettingsScreen> {
       child: Text(
         title,
         textDirection: TextDirection.rtl,
-        style: const TextStyle(
+        style: TextStyle(
           fontFamily: 'Amiri',
           fontSize: 16,
           fontWeight: FontWeight.bold,
-          color: AppColors.gold,
+          color: AppColors.goldC(context),
         ),
       ),
     );
@@ -199,6 +199,8 @@ class _SettingsScreenState extends State<SettingsScreen> {
     required ValueChanged<bool> onChanged,
     VoidCallback? onSubtitleTap,
   }) {
+    final accentGold = AppColors.goldC(context);
+
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
       child: Row(
@@ -208,10 +210,10 @@ class _SettingsScreenState extends State<SettingsScreen> {
             width: 44,
             height: 44,
             decoration: BoxDecoration(
-              color: AppColors.gold.withValues(alpha: 0.15),
+              color: accentGold.withValues(alpha: 0.15),
               shape: BoxShape.circle,
             ),
-            child: Icon(icon, color: AppColors.gold, size: 22),
+            child: Icon(icon, color: accentGold, size: 22),
           ),
           const SizedBox(width: 12),
           Expanded(
@@ -238,7 +240,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                         fontFamily: 'Amiri',
                         fontSize: 13,
                         color:
-                            value ? AppColors.gold : AppColors.textS(context),
+                            value ? accentGold : AppColors.textS(context),
                         decoration:
                             value ? TextDecoration.underline : null,
                       ),
@@ -250,7 +252,11 @@ class _SettingsScreenState extends State<SettingsScreen> {
           Switch(
             value: value,
             onChanged: onChanged,
-            activeColor: AppColors.gold,
+            activeColor: accentGold,
+            activeTrackColor: accentGold.withValues(alpha: 0.5),
+            inactiveTrackColor: AppColors.isDark(context)
+                ? const Color(0xFF4A4A4A)
+                : null,
           ),
         ],
       ),
@@ -306,113 +312,120 @@ class _SettingsScreenState extends State<SettingsScreen> {
                       indent: 60,
                     ),
                     // Font size selector
-                    Padding(
-                      padding: const EdgeInsets.symmetric(
-                          horizontal: 8, vertical: 8),
-                      child: Row(
-                        textDirection: TextDirection.rtl,
-                        children: [
-                          Container(
-                            width: 44,
-                            height: 44,
-                            decoration: BoxDecoration(
-                              color:
-                                  AppColors.gold.withValues(alpha: 0.15),
-                              shape: BoxShape.circle,
-                            ),
-                            child: const Icon(
-                              Icons.format_size_rounded,
-                              color: AppColors.gold,
-                              size: 22,
-                            ),
-                          ),
-                          const SizedBox(width: 12),
-                          Expanded(
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Text(
-                                  'حجم الخط',
-                                  textDirection: TextDirection.rtl,
-                                  style: TextStyle(
-                                    fontFamily: 'Amiri',
-                                    fontSize: 16,
-                                    fontWeight: FontWeight.bold,
-                                    color: AppColors.textP(context),
-                                  ),
+                    Builder(
+                      builder: (context) {
+                        final accentGold = AppColors.goldC(context);
+                        return Padding(
+                          padding: const EdgeInsets.symmetric(
+                              horizontal: 8, vertical: 8),
+                          child: Row(
+                            textDirection: TextDirection.rtl,
+                            children: [
+                              Container(
+                                width: 44,
+                                height: 44,
+                                decoration: BoxDecoration(
+                                  color:
+                                      accentGold.withValues(alpha: 0.15),
+                                  shape: BoxShape.circle,
                                 ),
-                                const SizedBox(height: 8),
-                                Row(
-                                  textDirection: TextDirection.rtl,
-                                  children: List.generate(
-                                    SettingsProvider.fontScales.length,
-                                    (index) {
-                                      final isSelected =
-                                          settings.fontSizeIndex == index;
-                                      return Expanded(
-                                        child: Padding(
-                                          padding: EdgeInsets.only(
-                                            left: index <
-                                                    SettingsProvider
-                                                            .fontScales
-                                                            .length -
-                                                        1
-                                                ? 6
-                                                : 0,
-                                          ),
-                                          child: GestureDetector(
-                                            onTap: () =>
-                                                settings.setFontSizeScale(
-                                              SettingsProvider
-                                                  .fontScales[index],
-                                            ),
-                                            child: Container(
-                                              padding:
-                                                  const EdgeInsets.symmetric(
-                                                      vertical: 6),
-                                              decoration: BoxDecoration(
-                                                color: isSelected
-                                                    ? AppColors.gold
-                                                    : AppColors.gold
-                                                        .withValues(
-                                                            alpha: 0.1),
-                                                borderRadius:
-                                                    BorderRadius.circular(8),
-                                                border: Border.all(
-                                                  color: isSelected
-                                                      ? AppColors.gold
-                                                      : AppColors.gold
-                                                          .withValues(
-                                                              alpha: 0.3),
-                                                ),
+                                child: Icon(
+                                  Icons.format_size_rounded,
+                                  color: accentGold,
+                                  size: 22,
+                                ),
+                              ),
+                              const SizedBox(width: 12),
+                              Expanded(
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Text(
+                                      'حجم الخط',
+                                      textDirection: TextDirection.rtl,
+                                      style: TextStyle(
+                                        fontFamily: 'Amiri',
+                                        fontSize: 16,
+                                        fontWeight: FontWeight.bold,
+                                        color: AppColors.textP(context),
+                                      ),
+                                    ),
+                                    const SizedBox(height: 8),
+                                    Row(
+                                      textDirection: TextDirection.rtl,
+                                      children: List.generate(
+                                        SettingsProvider.fontScales.length,
+                                        (index) {
+                                          final isSelected =
+                                              settings.fontSizeIndex == index;
+                                          return Expanded(
+                                            child: Padding(
+                                              padding: EdgeInsets.only(
+                                                left: index <
+                                                        SettingsProvider
+                                                                .fontScales
+                                                                .length -
+                                                            1
+                                                    ? 6
+                                                    : 0,
                                               ),
-                                              child: Center(
-                                                child: Text(
+                                              child: GestureDetector(
+                                                onTap: () =>
+                                                    settings.setFontSizeScale(
                                                   SettingsProvider
-                                                      .fontScaleLabels[index],
-                                                  style: TextStyle(
-                                                    fontFamily: 'Amiri',
-                                                    fontSize: 12,
-                                                    fontWeight:
-                                                        FontWeight.w700,
+                                                      .fontScales[index],
+                                                ),
+                                                child: Container(
+                                                  padding:
+                                                      const EdgeInsets.symmetric(
+                                                          vertical: 6),
+                                                  decoration: BoxDecoration(
                                                     color: isSelected
-                                                        ? AppColors.white
-                                                        : AppColors.gold,
+                                                        ? accentGold
+                                                        : accentGold
+                                                            .withValues(
+                                                                alpha: 0.1),
+                                                    borderRadius:
+                                                        BorderRadius.circular(8),
+                                                    border: Border.all(
+                                                      color: isSelected
+                                                          ? accentGold
+                                                          : accentGold
+                                                              .withValues(
+                                                                  alpha: 0.3),
+                                                    ),
+                                                  ),
+                                                  child: Center(
+                                                    child: Text(
+                                                      SettingsProvider
+                                                          .fontScaleLabels[index],
+                                                      style: TextStyle(
+                                                        fontFamily: 'Amiri',
+                                                        fontSize: 12,
+                                                        fontWeight:
+                                                            FontWeight.w700,
+                                                        color: isSelected
+                                                            ? AppColors.isDark(context)
+                                                                ? AppColors.darkBg
+                                                                : AppColors.white
+                                                            : accentGold,
+                                                      ),
+                                                    ),
                                                   ),
                                                 ),
                                               ),
                                             ),
-                                          ),
-                                        ),
-                                      );
-                                    },
-                                  ),
+                                          );
+                                        },
+                                      ),
+                                    ),
+                                  ],
                                 ),
-                              ],
-                            ),
+                              ),
+                            ],
                           ),
-                        ],
-                      ),
+                        );
+                      },
                     ),
                   ],
                 ),

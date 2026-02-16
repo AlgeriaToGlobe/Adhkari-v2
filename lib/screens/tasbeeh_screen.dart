@@ -53,9 +53,11 @@ class _TasbeehScreenState extends State<TasbeehScreen>
   }
 
   void _showLabelPicker(BuildContext context, AdhkarProvider provider) {
+    final dark = AppColors.isDark(context);
+    final accentGold = AppColors.goldC(context);
     showModalBottomSheet(
       context: context,
-      backgroundColor: AppColors.beigeLight,
+      backgroundColor: AppColors.scaffold(context),
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
       ),
@@ -74,7 +76,7 @@ class _TasbeehScreenState extends State<TasbeehScreen>
               mainAxisSize: MainAxisSize.min,
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
-                const Text(
+                Text(
                   'اختر الذكر',
                   textAlign: TextAlign.center,
                   textDirection: TextDirection.rtl,
@@ -82,7 +84,7 @@ class _TasbeehScreenState extends State<TasbeehScreen>
                     fontFamily: 'Amiri',
                     fontSize: 20,
                     fontWeight: FontWeight.w700,
-                    color: AppColors.textPrimary,
+                    color: AppColors.textP(context),
                   ),
                 ),
                 const SizedBox(height: 16),
@@ -104,13 +106,13 @@ class _TasbeehScreenState extends State<TasbeehScreen>
                         ),
                         decoration: BoxDecoration(
                           color: isSelected
-                              ? AppColors.gold
-                              : AppColors.cardBackground,
+                              ? accentGold
+                              : AppColors.card(context),
                           borderRadius: BorderRadius.circular(20),
                           border: Border.all(
                             color: isSelected
-                                ? AppColors.gold
-                                : AppColors.divider,
+                                ? accentGold
+                                : AppColors.dividerC(context),
                           ),
                         ),
                         child: Text(
@@ -120,8 +122,8 @@ class _TasbeehScreenState extends State<TasbeehScreen>
                             fontSize: 16,
                             fontWeight: FontWeight.w700,
                             color: isSelected
-                                ? AppColors.brownDark
-                                : AppColors.textPrimary,
+                                ? (dark ? AppColors.darkBg : AppColors.brownDark)
+                                : AppColors.textP(context),
                           ),
                         ),
                       ),
@@ -133,33 +135,34 @@ class _TasbeehScreenState extends State<TasbeehScreen>
                   controller: _customLabelController,
                   textDirection: TextDirection.rtl,
                   textAlign: TextAlign.right,
-                  style: const TextStyle(
+                  style: TextStyle(
                     fontFamily: 'Amiri',
                     fontSize: 16,
+                    color: AppColors.textP(context),
                   ),
                   decoration: InputDecoration(
                     hintText: 'أو اكتب ذكرًا مخصصًا...',
                     hintTextDirection: TextDirection.rtl,
                     hintStyle: TextStyle(
                       fontFamily: 'Amiri',
-                      color: AppColors.brownLight.withValues(alpha: 0.5),
+                      color: AppColors.textS(context).withValues(alpha: 0.5),
                     ),
                     filled: true,
-                    fillColor: AppColors.cardBackground,
+                    fillColor: AppColors.card(context),
                     border: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(12),
-                      borderSide: const BorderSide(color: AppColors.divider),
+                      borderSide: BorderSide(color: AppColors.dividerC(context)),
                     ),
                     enabledBorder: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(12),
-                      borderSide: const BorderSide(color: AppColors.divider),
+                      borderSide: BorderSide(color: AppColors.dividerC(context)),
                     ),
                     focusedBorder: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(12),
-                      borderSide: const BorderSide(color: AppColors.gold),
+                      borderSide: BorderSide(color: accentGold),
                     ),
                     suffixIcon: IconButton(
-                      icon: const Icon(Icons.check, color: AppColors.gold),
+                      icon: Icon(Icons.check, color: accentGold),
                       onPressed: () {
                         if (_customLabelController.text.trim().isNotEmpty) {
                           provider.setTasbeehLabel(
@@ -188,10 +191,12 @@ class _TasbeehScreenState extends State<TasbeehScreen>
   }
 
   void _showTargetPicker(BuildContext context, AdhkarProvider provider) {
+    final dark = AppColors.isDark(context);
+    final accentGold = AppColors.goldC(context);
     final targets = [33, 99, 100, 500, 1000];
     showModalBottomSheet(
       context: context,
-      backgroundColor: AppColors.beigeLight,
+      backgroundColor: AppColors.scaffold(context),
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
       ),
@@ -203,7 +208,7 @@ class _TasbeehScreenState extends State<TasbeehScreen>
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
-                const Text(
+                Text(
                   'اختر الهدف',
                   textAlign: TextAlign.center,
                   textDirection: TextDirection.rtl,
@@ -211,7 +216,7 @@ class _TasbeehScreenState extends State<TasbeehScreen>
                     fontFamily: 'Amiri',
                     fontSize: 20,
                     fontWeight: FontWeight.w700,
-                    color: AppColors.textPrimary,
+                    color: AppColors.textP(context),
                   ),
                 ),
                 const SizedBox(height: 16),
@@ -231,13 +236,13 @@ class _TasbeehScreenState extends State<TasbeehScreen>
                         height: 72,
                         decoration: BoxDecoration(
                           color: isSelected
-                              ? AppColors.gold
-                              : AppColors.cardBackground,
+                              ? accentGold
+                              : AppColors.card(context),
                           shape: BoxShape.circle,
                           border: Border.all(
                             color: isSelected
-                                ? AppColors.gold
-                                : AppColors.divider,
+                                ? accentGold
+                                : AppColors.dividerC(context),
                           ),
                         ),
                         alignment: Alignment.center,
@@ -248,8 +253,8 @@ class _TasbeehScreenState extends State<TasbeehScreen>
                             fontSize: 20,
                             fontWeight: FontWeight.w700,
                             color: isSelected
-                                ? AppColors.brownDark
-                                : AppColors.textPrimary,
+                                ? (dark ? AppColors.darkBg : AppColors.brownDark)
+                                : AppColors.textP(context),
                           ),
                         ),
                       ),
@@ -266,39 +271,43 @@ class _TasbeehScreenState extends State<TasbeehScreen>
   }
 
   void _showResetConfirmation(BuildContext context, AdhkarProvider provider) {
+    final accentGold = AppColors.goldC(context);
     showDialog(
       context: context,
       builder: (ctx) => Directionality(
         textDirection: TextDirection.rtl,
         child: AlertDialog(
-          backgroundColor: AppColors.beigeLight,
-          title: const Text(
+          backgroundColor: AppColors.card(context),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(16),
+          ),
+          title: Text(
             'إعادة العداد',
             textAlign: TextAlign.right,
             textDirection: TextDirection.rtl,
             style: TextStyle(
               fontFamily: 'Amiri',
               fontWeight: FontWeight.w700,
-              color: AppColors.textPrimary,
+              color: AppColors.textP(context),
             ),
           ),
-          content: const Text(
+          content: Text(
             'هل تريد إعادة العداد إلى صفر؟',
             textAlign: TextAlign.right,
             textDirection: TextDirection.rtl,
             style: TextStyle(
               fontFamily: 'Amiri',
-              color: AppColors.textSecondary,
+              color: AppColors.textS(context),
             ),
           ),
           actions: [
             TextButton(
               onPressed: () => Navigator.pop(ctx),
-              child: const Text(
+              child: Text(
                 'إلغاء',
                 style: TextStyle(
                   fontFamily: 'Amiri',
-                  color: AppColors.brownLight,
+                  color: AppColors.textS(context),
                 ),
               ),
             ),
@@ -307,11 +316,11 @@ class _TasbeehScreenState extends State<TasbeehScreen>
                 provider.resetTasbeeh();
                 Navigator.pop(ctx);
               },
-              child: const Text(
+              child: Text(
                 'إعادة',
                 style: TextStyle(
                   fontFamily: 'Amiri',
-                  color: AppColors.gold,
+                  color: accentGold,
                   fontWeight: FontWeight.w700,
                 ),
               ),
@@ -324,10 +333,13 @@ class _TasbeehScreenState extends State<TasbeehScreen>
 
   @override
   Widget build(BuildContext context) {
+    final dark = AppColors.isDark(context);
+    final accentGold = AppColors.goldC(context);
+
     return Directionality(
       textDirection: TextDirection.rtl,
       child: Scaffold(
-        backgroundColor: AppColors.beigeLight,
+        backgroundColor: AppColors.scaffold(context),
         appBar: AppBar(
           title: const Text(
             'التسبيح',
@@ -336,8 +348,8 @@ class _TasbeehScreenState extends State<TasbeehScreen>
               fontWeight: FontWeight.w700,
             ),
           ),
-          backgroundColor: AppColors.brown,
-          foregroundColor: AppColors.white,
+          backgroundColor: dark ? AppColors.darkSurface : AppColors.brown,
+          foregroundColor: dark ? AppColors.darkTextPrimary : AppColors.white,
           centerTitle: true,
           elevation: 0,
         ),
@@ -359,11 +371,12 @@ class _TasbeehScreenState extends State<TasbeehScreen>
                       vertical: 12,
                     ),
                     decoration: BoxDecoration(
-                      color: AppColors.white,
+                      color: AppColors.card(context),
                       borderRadius: BorderRadius.circular(16),
                       boxShadow: [
                         BoxShadow(
-                          color: AppColors.brown.withValues(alpha: 0.06),
+                          color: (dark ? Colors.black : AppColors.brown)
+                              .withValues(alpha: dark ? 0.15 : 0.06),
                           blurRadius: 12,
                           offset: const Offset(0, 4),
                         ),
@@ -374,18 +387,18 @@ class _TasbeehScreenState extends State<TasbeehScreen>
                       children: [
                         Text(
                           provider.tasbeehLabel,
-                          style: const TextStyle(
+                          style: TextStyle(
                             fontFamily: 'Amiri',
                             fontSize: 22,
                             fontWeight: FontWeight.w700,
-                            color: AppColors.brown,
+                            color: AppColors.brownC(context),
                           ),
                         ),
                         const SizedBox(width: 8),
                         Icon(
                           Icons.edit,
                           size: 16,
-                          color: AppColors.gold.withValues(alpha: 0.6),
+                          color: accentGold.withValues(alpha: 0.6),
                         ),
                       ],
                     ),
@@ -412,6 +425,7 @@ class _TasbeehScreenState extends State<TasbeehScreen>
                         painter: _TasbeehRingPainter(
                           count: provider.tasbeehCount,
                           target: provider.tasbeehTarget,
+                          isDark: dark,
                         ),
                         child: Center(
                           child: Column(
@@ -419,21 +433,21 @@ class _TasbeehScreenState extends State<TasbeehScreen>
                             children: [
                               Text(
                                 '${provider.tasbeehCount}',
-                                style: const TextStyle(
+                                style: TextStyle(
                                   fontFamily: 'Amiri',
                                   fontSize: 56,
                                   fontWeight: FontWeight.w700,
-                                  color: AppColors.brown,
+                                  color: AppColors.brownC(context),
                                   height: 1.0,
                                 ),
                               ),
                               const SizedBox(height: 4),
                               Text(
                                 'من ${provider.tasbeehTarget}',
-                                style: const TextStyle(
+                                style: TextStyle(
                                   fontFamily: 'Amiri',
                                   fontSize: 16,
-                                  color: AppColors.textSecondary,
+                                  color: AppColors.textS(context),
                                 ),
                               ),
                             ],
@@ -471,8 +485,8 @@ class _TasbeehScreenState extends State<TasbeehScreen>
                     _buildControlButton(
                       icon: Icons.vibration,
                       color: provider.vibrationEnabled
-                          ? AppColors.gold
-                          : AppColors.brownLight,
+                          ? accentGold
+                          : AppColors.brownLightC(context),
                       onTap: () => provider
                           .setVibrationEnabled(!provider.vibrationEnabled),
                     ),
@@ -481,7 +495,7 @@ class _TasbeehScreenState extends State<TasbeehScreen>
                     // Reset
                     _buildControlButton(
                       icon: Icons.refresh,
-                      color: AppColors.brownLight,
+                      color: AppColors.brownLightC(context),
                       onTap: () =>
                           _showResetConfirmation(context, provider),
                     ),
@@ -490,7 +504,7 @@ class _TasbeehScreenState extends State<TasbeehScreen>
                     // Target selector
                     _buildControlButton(
                       icon: Icons.tune,
-                      color: AppColors.brownLight,
+                      color: AppColors.brownLightC(context),
                       onTap: () => _showTargetPicker(context, provider),
                     ),
                   ],
@@ -516,10 +530,10 @@ class _TasbeehScreenState extends State<TasbeehScreen>
         width: 48,
         height: 48,
         decoration: BoxDecoration(
-          color: AppColors.cardBackground,
+          color: AppColors.card(context),
           shape: BoxShape.circle,
           border: Border.all(
-            color: AppColors.divider,
+            color: AppColors.dividerC(context),
             width: 1,
           ),
         ),
@@ -536,10 +550,12 @@ class _TasbeehScreenState extends State<TasbeehScreen>
 class _TasbeehRingPainter extends CustomPainter {
   final int count;
   final int target;
+  final bool isDark;
 
   _TasbeehRingPainter({
     required this.count,
     required this.target,
+    required this.isDark,
   });
 
   @override
@@ -547,15 +563,17 @@ class _TasbeehRingPainter extends CustomPainter {
     final center = Offset(size.width / 2, size.height / 2);
     final radius = size.width / 2;
 
+    final goldColor = isDark ? AppColors.darkGold : AppColors.gold;
+
     // Background circle
     final bgPaint = Paint()
-      ..color = AppColors.beigeWarm
+      ..color = isDark ? AppColors.darkCard : AppColors.beigeWarm
       ..style = PaintingStyle.fill;
     canvas.drawCircle(center, radius - 12, bgPaint);
 
     // Outer ring
     final ringPaint = Paint()
-      ..color = AppColors.gold
+      ..color = goldColor
       ..style = PaintingStyle.stroke
       ..strokeWidth = 2.0;
     canvas.drawCircle(center, radius - 4, ringPaint);
@@ -575,7 +593,9 @@ class _TasbeehRingPainter extends CustomPainter {
 
         final isFilled = i < count;
         final tickPaint = Paint()
-          ..color = isFilled ? AppColors.gold : AppColors.beigeDark
+          ..color = isFilled
+              ? goldColor
+              : (isDark ? AppColors.darkDivider : AppColors.beigeDark)
           ..style = PaintingStyle.stroke
           ..strokeWidth = isFilled ? 2.5 : 1.5
           ..strokeCap = StrokeCap.round;
@@ -591,6 +611,8 @@ class _TasbeehRingPainter extends CustomPainter {
 
   @override
   bool shouldRepaint(covariant _TasbeehRingPainter oldDelegate) {
-    return oldDelegate.count != count || oldDelegate.target != target;
+    return oldDelegate.count != count ||
+        oldDelegate.target != target ||
+        oldDelegate.isDark != isDark;
   }
 }

@@ -111,32 +111,37 @@ class AdhkarTabScreen extends StatelessWidget {
                               textDirection: TextDirection.rtl,
                               children: [
                                 // Icon
-                                Container(
-                                  width: 50,
-                                  height: 50,
-                                  decoration: BoxDecoration(
-                                    shape: BoxShape.circle,
-                                    color: isCompleted
-                                        ? AppColors.counterCompleted
-                                            .withValues(alpha: 0.1)
-                                        : AppColors.gold
-                                            .withValues(alpha: 0.1),
-                                    border: Border.all(
-                                      color: isCompleted
-                                          ? AppColors.counterCompleted
-                                              .withValues(alpha: 0.3)
-                                          : AppColors.gold
-                                              .withValues(alpha: 0.3),
-                                      width: 1.5,
-                                    ),
-                                  ),
-                                  child: Icon(
-                                    isCompleted ? Icons.check : category.icon,
-                                    size: 24,
-                                    color: isCompleted
-                                        ? AppColors.counterCompleted
-                                        : AppColors.gold,
-                                  ),
+                                Builder(
+                                  builder: (context) {
+                                    final accentGold = AppColors.goldC(context);
+                                    return Container(
+                                      width: 50,
+                                      height: 50,
+                                      decoration: BoxDecoration(
+                                        shape: BoxShape.circle,
+                                        color: isCompleted
+                                            ? AppColors.counterCompleted
+                                                .withValues(alpha: 0.1)
+                                            : accentGold
+                                                .withValues(alpha: 0.1),
+                                        border: Border.all(
+                                          color: isCompleted
+                                              ? AppColors.counterCompleted
+                                                  .withValues(alpha: 0.3)
+                                              : accentGold
+                                                  .withValues(alpha: 0.3),
+                                          width: 1.5,
+                                        ),
+                                      ),
+                                      child: Icon(
+                                        isCompleted ? Icons.check : category.icon,
+                                        size: 24,
+                                        color: isCompleted
+                                            ? AppColors.counterCompleted
+                                            : accentGold,
+                                      ),
+                                    );
+                                  },
                                 ),
                                 const SizedBox(width: 14),
 
@@ -182,7 +187,7 @@ class AdhkarTabScreen extends StatelessWidget {
                                               AlwaysStoppedAnimation<Color>(
                                             isCompleted
                                                 ? AppColors.counterCompleted
-                                                : AppColors.gold,
+                                                : AppColors.goldC(context),
                                           ),
                                         ),
                                       ),
@@ -200,7 +205,7 @@ class AdhkarTabScreen extends StatelessWidget {
                                     fontWeight: FontWeight.w700,
                                     color: isCompleted
                                         ? AppColors.counterCompleted
-                                        : AppColors.gold,
+                                        : AppColors.goldC(context),
                                   ),
                                 ),
                               ],

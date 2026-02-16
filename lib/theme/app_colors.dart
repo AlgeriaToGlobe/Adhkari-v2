@@ -35,15 +35,16 @@ class AppColors {
   static const Color counterCompleted = Color(0xFF6B8E5B);
   static const Color counterBackground = Color(0xFFF5EFE4);
 
-  // ── Dark mode palette ──
-  static const Color darkBg = Color(0xFF1A1410);
-  static const Color darkSurface = Color(0xFF241C14);
-  static const Color darkCard = Color(0xFF2E2318);
-  static const Color darkDivider = Color(0xFF3D3228);
-  static const Color darkTextPrimary = Color(0xFFF5EFE4);
+  // ── Dark mode palette (Midnight & Gold — Kiswah aesthetic) ──
+  static const Color darkBg = Color(0xFF141312);          // Deep Onyx
+  static const Color darkSurface = Color(0xFF1E1D1B);     // Subtle elevation
+  static const Color darkCard = Color(0xFF262422);         // Warm Charcoal
+  static const Color darkDivider = Color(0xFF3A3836);      // Neutral divider
+  static const Color darkTextPrimary = Color(0xFFF5F2E9);  // Bone White
   static const Color darkTextSecondary = Color(0xFFB5A898);
-  static const Color darkProgressBg = Color(0xFF3D3228);
-  static const Color darkBarBg = Color(0xFF211A12);
+  static const Color darkProgressBg = Color(0xFF3A3836);
+  static const Color darkBarBg = Color(0xFF1A1918);
+  static const Color darkGold = Color(0xFFEBC06D);         // Luminous Gold
 
   // ── Context-aware color helpers ──
   static bool isDark(BuildContext context) =>
@@ -73,8 +74,11 @@ class AppColors {
   static Color barBg(BuildContext context) =>
       isDark(context) ? darkBarBg : beige;
 
+  static Color goldC(BuildContext context) =>
+      isDark(context) ? darkGold : gold;
+
   static Color brownC(BuildContext context) =>
-      isDark(context) ? gold : brown;
+      isDark(context) ? darkGold : brown;
 
   static Color brownLightC(BuildContext context) =>
       isDark(context) ? darkTextSecondary : brownLight;
@@ -102,5 +106,17 @@ class AppColors {
     begin: Alignment.topCenter,
     end: Alignment.bottomCenter,
     colors: [Color(0xFFFBF7F0), Color(0xFFF5EFE4)],
+  );
+
+  static const LinearGradient darkHeaderGradient = LinearGradient(
+    begin: Alignment.topCenter,
+    end: Alignment.bottomCenter,
+    colors: [Color(0xFF262422), Color(0xFF1E1D1B)],
+  );
+
+  static const LinearGradient darkHeaderGradientSubtle = LinearGradient(
+    begin: Alignment.topLeft,
+    end: Alignment.bottomRight,
+    colors: [Color(0xFF262422), Color(0xFF1E1D1B)],
   );
 }

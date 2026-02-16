@@ -131,14 +131,7 @@ class AdhkarListScreen extends StatelessWidget {
                           background: Container(
                             decoration: BoxDecoration(
                               gradient: dark
-                                  ? const LinearGradient(
-                                      begin: Alignment.topCenter,
-                                      end: Alignment.bottomCenter,
-                                      colors: [
-                                        AppColors.darkCard,
-                                        AppColors.darkSurface,
-                                      ],
-                                    )
+                                  ? AppColors.darkHeaderGradient
                                   : AppColors.headerGradient,
                             ),
                             child: Align(

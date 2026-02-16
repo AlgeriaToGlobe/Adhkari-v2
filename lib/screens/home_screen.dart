@@ -140,12 +140,12 @@ class HomeScreen extends StatelessWidget {
                               height: 40,
                               decoration: BoxDecoration(
                                 shape: BoxShape.circle,
-                                color: AppColors.gold.withValues(alpha: 0.1),
+                                color: AppColors.goldC(context).withValues(alpha: 0.1),
                               ),
-                              child: const Icon(
+                              child: Icon(
                                 Icons.calendar_month_rounded,
                                 size: 20,
-                                color: AppColors.gold,
+                                color: AppColors.goldC(context),
                               ),
                             ),
                           ],
@@ -179,12 +179,14 @@ class HomeScreen extends StatelessWidget {
                         Container(
                           padding: const EdgeInsets.all(18),
                           decoration: BoxDecoration(
-                            gradient: AppColors.headerGradientSubtle,
+                            gradient: AppColors.isDark(context)
+                                ? AppColors.darkHeaderGradientSubtle
+                                : AppColors.headerGradientSubtle,
                             borderRadius: BorderRadius.circular(16),
                             boxShadow: [
                               BoxShadow(
-                                color:
-                                    AppColors.brown.withValues(alpha: 0.15),
+                                color: (AppColors.isDark(context) ? Colors.black : AppColors.brown)
+                                    .withValues(alpha: AppColors.isDark(context) ? 0.2 : 0.15),
                                 blurRadius: 12,
                                 offset: const Offset(0, 4),
                               ),
@@ -201,8 +203,8 @@ class HomeScreen extends StatelessWidget {
                                   backgroundColor:
                                       AppColors.white.withValues(alpha: 0.15),
                                   valueColor:
-                                      const AlwaysStoppedAnimation<Color>(
-                                    AppColors.gold,
+                                      AlwaysStoppedAnimation<Color>(
+                                    AppColors.goldC(context),
                                   ),
                                 ),
                               ),
@@ -227,11 +229,11 @@ class HomeScreen extends StatelessWidget {
                                   Text(
                                     '$percentage%',
                                     textDirection: TextDirection.ltr,
-                                    style: const TextStyle(
+                                    style: TextStyle(
                                       fontFamily: 'Amiri',
                                       fontSize: 16,
                                       fontWeight: FontWeight.w700,
-                                      color: AppColors.gold,
+                                      color: AppColors.goldC(context),
                                     ),
                                   ),
                                 ],
@@ -397,6 +399,8 @@ class _QuickAccessButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final accentGold = AppColors.goldC(context);
+
     return GestureDetector(
       onTap: onTap,
       child: Column(
@@ -407,16 +411,16 @@ class _QuickAccessButton extends StatelessWidget {
             height: 56,
             decoration: BoxDecoration(
               shape: BoxShape.circle,
-              color: AppColors.gold.withValues(alpha: 0.08),
+              color: accentGold.withValues(alpha: 0.08),
               border: Border.all(
-                color: AppColors.gold.withValues(alpha: 0.35),
+                color: accentGold.withValues(alpha: 0.35),
                 width: 1.5,
               ),
             ),
             child: Icon(
               icon,
               size: 24,
-              color: AppColors.gold,
+              color: accentGold,
             ),
           ),
           const SizedBox(height: 8),
@@ -460,6 +464,8 @@ class _CategoryCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final accentGold = AppColors.goldC(context);
+
     return GestureDetector(
       onTap: onTap,
       child: Container(
@@ -493,11 +499,11 @@ class _CategoryCard extends StatelessWidget {
                   shape: BoxShape.circle,
                   color: isCompleted
                       ? AppColors.counterCompleted.withValues(alpha: 0.1)
-                      : AppColors.gold.withValues(alpha: 0.1),
+                      : accentGold.withValues(alpha: 0.1),
                   border: Border.all(
                     color: isCompleted
                         ? AppColors.counterCompleted.withValues(alpha: 0.3)
-                        : AppColors.gold.withValues(alpha: 0.3),
+                        : accentGold.withValues(alpha: 0.3),
                     width: 1.5,
                   ),
                 ),
@@ -506,7 +512,7 @@ class _CategoryCard extends StatelessWidget {
                   size: 22,
                   color: isCompleted
                       ? AppColors.counterCompleted
-                      : AppColors.gold,
+                      : accentGold,
                 ),
               ),
               const SizedBox(height: 10),
@@ -550,7 +556,7 @@ class _CategoryCard extends StatelessWidget {
                     valueColor: AlwaysStoppedAnimation<Color>(
                       isCompleted
                           ? AppColors.counterCompleted
-                          : AppColors.gold,
+                          : accentGold,
                     ),
                   ),
                 ),

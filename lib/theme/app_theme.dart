@@ -135,9 +135,9 @@ class AppTheme {
       brightness: Brightness.dark,
       scaffoldBackgroundColor: AppColors.darkBg,
       colorScheme: const ColorScheme.dark(
-        primary: AppColors.gold,
+        primary: AppColors.darkGold,
         onPrimary: AppColors.darkBg,
-        secondary: AppColors.gold,
+        secondary: AppColors.darkGold,
         onSecondary: AppColors.darkBg,
         surface: AppColors.darkCard,
         onSurface: AppColors.darkTextPrimary,
@@ -165,7 +165,7 @@ class AppTheme {
       ),
       elevatedButtonTheme: ElevatedButtonThemeData(
         style: ElevatedButton.styleFrom(
-          backgroundColor: AppColors.gold,
+          backgroundColor: AppColors.darkGold,
           foregroundColor: AppColors.darkBg,
           elevation: 2,
           padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 14),
@@ -233,7 +233,7 @@ class AppTheme {
           fontFamily: fontFamily,
           fontSize: 16,
           fontWeight: FontWeight.w700,
-          color: AppColors.gold,
+          color: AppColors.darkGold,
         ),
       ),
       dividerTheme: const DividerThemeData(
@@ -242,8 +242,25 @@ class AppTheme {
         space: 0,
       ),
       iconTheme: const IconThemeData(
-        color: AppColors.gold,
+        color: AppColors.darkGold,
         size: 24,
+      ),
+      switchTheme: SwitchThemeData(
+        thumbColor: WidgetStateProperty.resolveWith((states) {
+          if (states.contains(WidgetState.selected)) {
+            return AppColors.darkGold;
+          }
+          return const Color(0xFF9E9E9E);
+        }),
+        trackColor: WidgetStateProperty.resolveWith((states) {
+          if (states.contains(WidgetState.selected)) {
+            return AppColors.darkGold.withValues(alpha: 0.5);
+          }
+          return const Color(0xFF4A4A4A);
+        }),
+        trackOutlineColor: WidgetStateProperty.resolveWith((states) {
+          return Colors.transparent;
+        }),
       ),
     );
   }

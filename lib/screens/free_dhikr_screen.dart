@@ -10,6 +10,7 @@ class FreeDhikrScreen extends StatelessWidget {
   void _showAddDialog(BuildContext context) {
     final textController = TextEditingController();
     final countController = TextEditingController(text: '100');
+    final accentGold = AppColors.goldC(context);
 
     showDialog(
       context: context,
@@ -17,18 +18,18 @@ class FreeDhikrScreen extends StatelessWidget {
         return Directionality(
           textDirection: TextDirection.rtl,
           child: AlertDialog(
-            backgroundColor: AppColors.cardBackground,
+            backgroundColor: AppColors.card(context),
             shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(16),
             ),
-            title: const Text(
+            title: Text(
               'إضافة ذكر جديد',
               textAlign: TextAlign.center,
               style: TextStyle(
                 fontFamily: 'Amiri',
                 fontSize: 20,
                 fontWeight: FontWeight.bold,
-                color: AppColors.textPrimary,
+                color: AppColors.textP(context),
               ),
             ),
             content: Column(
@@ -38,30 +39,30 @@ class FreeDhikrScreen extends StatelessWidget {
                   controller: textController,
                   textDirection: TextDirection.rtl,
                   textAlign: TextAlign.right,
-                  style: const TextStyle(
+                  style: TextStyle(
                     fontFamily: 'Amiri',
                     fontSize: 16,
-                    color: AppColors.textPrimary,
+                    color: AppColors.textP(context),
                   ),
                   decoration: InputDecoration(
                     hintText: 'نص الذكر',
                     hintStyle: TextStyle(
                       fontFamily: 'Amiri',
-                      color: AppColors.textSecondary.withValues(alpha: 0.6),
+                      color: AppColors.textS(context).withValues(alpha: 0.6),
                     ),
                     filled: true,
-                    fillColor: AppColors.beigeLight,
+                    fillColor: AppColors.surface(context),
                     border: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(12),
-                      borderSide: const BorderSide(color: AppColors.divider),
+                      borderSide: BorderSide(color: AppColors.dividerC(context)),
                     ),
                     enabledBorder: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(12),
-                      borderSide: const BorderSide(color: AppColors.divider),
+                      borderSide: BorderSide(color: AppColors.dividerC(context)),
                     ),
                     focusedBorder: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(12),
-                      borderSide: const BorderSide(color: AppColors.gold),
+                      borderSide: BorderSide(color: accentGold),
                     ),
                   ),
                 ),
@@ -71,30 +72,30 @@ class FreeDhikrScreen extends StatelessWidget {
                   textDirection: TextDirection.rtl,
                   textAlign: TextAlign.right,
                   keyboardType: TextInputType.number,
-                  style: const TextStyle(
+                  style: TextStyle(
                     fontFamily: 'Amiri',
                     fontSize: 16,
-                    color: AppColors.textPrimary,
+                    color: AppColors.textP(context),
                   ),
                   decoration: InputDecoration(
                     hintText: 'عدد مرات التكرار',
                     hintStyle: TextStyle(
                       fontFamily: 'Amiri',
-                      color: AppColors.textSecondary.withValues(alpha: 0.6),
+                      color: AppColors.textS(context).withValues(alpha: 0.6),
                     ),
                     filled: true,
-                    fillColor: AppColors.beigeLight,
+                    fillColor: AppColors.surface(context),
                     border: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(12),
-                      borderSide: const BorderSide(color: AppColors.divider),
+                      borderSide: BorderSide(color: AppColors.dividerC(context)),
                     ),
                     enabledBorder: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(12),
-                      borderSide: const BorderSide(color: AppColors.divider),
+                      borderSide: BorderSide(color: AppColors.dividerC(context)),
                     ),
                     focusedBorder: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(12),
-                      borderSide: const BorderSide(color: AppColors.gold),
+                      borderSide: BorderSide(color: accentGold),
                     ),
                   ),
                 ),
@@ -103,11 +104,11 @@ class FreeDhikrScreen extends StatelessWidget {
             actions: [
               TextButton(
                 onPressed: () => Navigator.pop(ctx),
-                child: const Text(
+                child: Text(
                   'إلغاء',
                   style: TextStyle(
                     fontFamily: 'Amiri',
-                    color: AppColors.textSecondary,
+                    color: AppColors.textS(context),
                   ),
                 ),
               ),
@@ -125,12 +126,12 @@ class FreeDhikrScreen extends StatelessWidget {
                     }
                   }
                 },
-                child: const Text(
+                child: Text(
                   'إضافة',
                   style: TextStyle(
                     fontFamily: 'Amiri',
                     fontWeight: FontWeight.bold,
-                    color: AppColors.gold,
+                    color: accentGold,
                   ),
                 ),
               ),
@@ -149,37 +150,37 @@ class FreeDhikrScreen extends StatelessWidget {
         return Directionality(
           textDirection: TextDirection.rtl,
           child: AlertDialog(
-            backgroundColor: AppColors.cardBackground,
+            backgroundColor: AppColors.card(context),
             shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(16),
             ),
-            title: const Text(
+            title: Text(
               'حذف الذكر',
               textAlign: TextAlign.center,
               style: TextStyle(
                 fontFamily: 'Amiri',
                 fontSize: 20,
                 fontWeight: FontWeight.bold,
-                color: AppColors.textPrimary,
+                color: AppColors.textP(context),
               ),
             ),
-            content: const Text(
+            content: Text(
               'هل تريد حذف هذا الذكر؟',
               textAlign: TextAlign.right,
               style: TextStyle(
                 fontFamily: 'Amiri',
                 fontSize: 16,
-                color: AppColors.textSecondary,
+                color: AppColors.textS(context),
               ),
             ),
             actions: [
               TextButton(
                 onPressed: () => Navigator.pop(ctx),
-                child: const Text(
+                child: Text(
                   'إلغاء',
                   style: TextStyle(
                     fontFamily: 'Amiri',
-                    color: AppColors.textSecondary,
+                    color: AppColors.textS(context),
                   ),
                 ),
               ),
@@ -206,10 +207,13 @@ class FreeDhikrScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final dark = AppColors.isDark(context);
+    final accentGold = AppColors.goldC(context);
+
     return Directionality(
       textDirection: TextDirection.rtl,
       child: Scaffold(
-        backgroundColor: AppColors.beigeLight,
+        backgroundColor: AppColors.scaffold(context),
         body: SafeArea(
           child: Consumer<AdhkarProvider>(
             builder: (context, provider, _) {
@@ -223,23 +227,23 @@ class FreeDhikrScreen extends StatelessWidget {
                     padding: const EdgeInsets.fromLTRB(16, 20, 16, 8),
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
-                      children: const [
+                      children: [
                         Text(
                           'الذكر الحر',
                           style: TextStyle(
                             fontFamily: 'Amiri',
                             fontSize: 24,
                             fontWeight: FontWeight.bold,
-                            color: AppColors.textPrimary,
+                            color: AppColors.textP(context),
                           ),
                         ),
-                        SizedBox(height: 4),
+                        const SizedBox(height: 4),
                         Text(
                           'أضف أذكارك الخاصة',
                           style: TextStyle(
                             fontFamily: 'Amiri',
                             fontSize: 14,
-                            color: AppColors.textSecondary,
+                            color: AppColors.textS(context),
                           ),
                         ),
                       ],
@@ -251,7 +255,7 @@ class FreeDhikrScreen extends StatelessWidget {
                     padding:
                         const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
                     child: Material(
-                      color: AppColors.gold,
+                      color: accentGold,
                       borderRadius: BorderRadius.circular(12),
                       child: InkWell(
                         onTap: () => _showAddDialog(context),
@@ -260,20 +264,20 @@ class FreeDhikrScreen extends StatelessWidget {
                           padding: const EdgeInsets.symmetric(vertical: 14),
                           child: Row(
                             mainAxisAlignment: MainAxisAlignment.center,
-                            children: const [
+                            children: [
                               Icon(
                                 Icons.add_circle_outline,
-                                color: AppColors.brownDark,
+                                color: dark ? AppColors.darkBg : AppColors.brownDark,
                                 size: 22,
                               ),
-                              SizedBox(width: 8),
+                              const SizedBox(width: 8),
                               Text(
                                 'إضافة ذكر جديد',
                                 style: TextStyle(
                                   fontFamily: 'Amiri',
                                   fontSize: 16,
                                   fontWeight: FontWeight.bold,
-                                  color: AppColors.brownDark,
+                                  color: dark ? AppColors.darkBg : AppColors.brownDark,
                                 ),
                               ),
                             ],
@@ -288,7 +292,7 @@ class FreeDhikrScreen extends StatelessWidget {
                   // ── List or empty state ──
                   Expanded(
                     child: items.isEmpty
-                        ? _buildEmptyState()
+                        ? _buildEmptyState(context)
                         : ListView.builder(
                             padding: const EdgeInsets.symmetric(
                                 horizontal: 16, vertical: 6),
@@ -309,7 +313,7 @@ class FreeDhikrScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildEmptyState() {
+  Widget _buildEmptyState(BuildContext context) {
     return Center(
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
@@ -317,24 +321,24 @@ class FreeDhikrScreen extends StatelessWidget {
           Icon(
             Icons.edit_note,
             size: 64,
-            color: AppColors.gold.withValues(alpha: 0.3),
+            color: AppColors.goldC(context).withValues(alpha: 0.3),
           ),
           const SizedBox(height: 16),
-          const Text(
+          Text(
             'لا توجد أذكار مضافة',
             style: TextStyle(
               fontFamily: 'Amiri',
               fontSize: 18,
-              color: AppColors.textSecondary,
+              color: AppColors.textS(context),
             ),
           ),
           const SizedBox(height: 8),
-          const Text(
+          Text(
             'اضغط الزر أعلاه لإضافة ذكر جديد',
             style: TextStyle(
               fontFamily: 'Amiri',
               fontSize: 14,
-              color: AppColors.textSecondary,
+              color: AppColors.textS(context),
             ),
           ),
         ],
@@ -344,17 +348,20 @@ class FreeDhikrScreen extends StatelessWidget {
 
   Widget _buildDhikrCard(
       BuildContext context, AdhkarProvider provider, FreeDhikrItem item) {
+    final dark = AppColors.isDark(context);
+    final accentGold = AppColors.goldC(context);
     final progressColor =
-        item.isCompleted ? AppColors.counterCompleted : AppColors.gold;
+        item.isCompleted ? AppColors.counterCompleted : accentGold;
 
     return Container(
       margin: const EdgeInsets.symmetric(horizontal: 0, vertical: 6),
       decoration: BoxDecoration(
-        color: AppColors.white,
+        color: AppColors.card(context),
         borderRadius: BorderRadius.circular(16),
         boxShadow: [
           BoxShadow(
-            color: AppColors.brown.withValues(alpha: 0.06),
+            color: (dark ? Colors.black : AppColors.brown)
+                .withValues(alpha: dark ? 0.15 : 0.06),
             blurRadius: 8,
             offset: const Offset(0, 2),
           ),
@@ -379,7 +386,7 @@ class FreeDhikrScreen extends StatelessWidget {
                       child: CircularProgressIndicator(
                         value: item.progress,
                         strokeWidth: 4,
-                        backgroundColor: AppColors.counterBackground,
+                        backgroundColor: AppColors.progressBg(context),
                         valueColor:
                             AlwaysStoppedAnimation<Color>(progressColor),
                       ),
@@ -408,11 +415,11 @@ class FreeDhikrScreen extends StatelessWidget {
                 children: [
                   Text(
                     item.text,
-                    style: const TextStyle(
+                    style: TextStyle(
                       fontFamily: 'Amiri',
                       fontSize: 18,
                       fontWeight: FontWeight.bold,
-                      color: AppColors.textPrimary,
+                      color: AppColors.textP(context),
                     ),
                     maxLines: 2,
                     overflow: TextOverflow.ellipsis,
@@ -420,10 +427,10 @@ class FreeDhikrScreen extends StatelessWidget {
                   const SizedBox(height: 4),
                   Text(
                     '${item.currentCount} من ${item.targetCount}',
-                    style: const TextStyle(
+                    style: TextStyle(
                       fontFamily: 'Amiri',
                       fontSize: 13,
-                      color: AppColors.textSecondary,
+                      color: AppColors.textS(context),
                     ),
                   ),
                 ],
@@ -432,14 +439,14 @@ class FreeDhikrScreen extends StatelessWidget {
 
             // ── Left side: popup menu ──
             PopupMenuButton<String>(
-              icon: const Icon(
+              icon: Icon(
                 Icons.more_vert,
-                color: AppColors.textSecondary,
+                color: AppColors.textS(context),
               ),
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(12),
               ),
-              color: AppColors.cardBackground,
+              color: AppColors.card(context),
               onSelected: (value) {
                 if (value == 'reset') {
                   provider.resetFreeDhikrItem(item.id);
@@ -453,14 +460,14 @@ class FreeDhikrScreen extends StatelessWidget {
                   child: Directionality(
                     textDirection: TextDirection.rtl,
                     child: Row(
-                      children: const [
-                        Icon(Icons.refresh, size: 20, color: AppColors.gold),
-                        SizedBox(width: 8),
+                      children: [
+                        Icon(Icons.refresh, size: 20, color: accentGold),
+                        const SizedBox(width: 8),
                         Text(
                           'إعادة العداد',
                           style: TextStyle(
                             fontFamily: 'Amiri',
-                            color: AppColors.textPrimary,
+                            color: AppColors.textP(context),
                           ),
                         ),
                       ],
