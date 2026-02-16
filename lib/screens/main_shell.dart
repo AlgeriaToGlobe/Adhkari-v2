@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../theme/app_colors.dart';
 import 'home_screen.dart';
+import 'taqwim_screen.dart';
 import 'adhkar_tab_screen.dart';
 import 'free_dhikr_screen.dart';
 import 'settings_screen.dart';
@@ -18,6 +19,7 @@ class _MainShellState extends State<MainShell> {
 
   final List<Widget> _screens = const [
     HomeScreen(),
+    TaqwimScreen(),
     AdhkarTabScreen(),
     FreeDhikrScreen(),
     SettingsScreen(),
@@ -66,6 +68,11 @@ class _MainShellState extends State<MainShell> {
                 icon: Icon(Icons.home_outlined),
                 activeIcon: Icon(Icons.home),
                 label: 'الرئيسية',
+              ),
+              BottomNavigationBarItem(
+                icon: Icon(Icons.calendar_month_outlined),
+                activeIcon: Icon(Icons.calendar_month),
+                label: 'التقويم',
               ),
               BottomNavigationBarItem(
                 icon: Icon(Icons.menu_book_outlined),
