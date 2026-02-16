@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../providers/adhkar_provider.dart';
 import '../theme/app_colors.dart';
+import '../widgets/accessibility_bar.dart';
 import 'adhkar_list_screen.dart';
 
 /// The "الأذكار" tab – shows all adhkar categories as a scrollable list.
@@ -13,7 +14,7 @@ class AdhkarTabScreen extends StatelessWidget {
     return Directionality(
       textDirection: TextDirection.rtl,
       child: Scaffold(
-        backgroundColor: AppColors.beigeLight,
+        backgroundColor: AppColors.scaffold(context),
         body: SafeArea(
           child: Consumer<AdhkarProvider>(
             builder: (context, provider, _) {
@@ -23,8 +24,8 @@ class AdhkarTabScreen extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
                   // ── Title ──
-                  const Padding(
-                    padding: EdgeInsets.fromLTRB(20, 20, 20, 4),
+                  Padding(
+                    padding: const EdgeInsets.fromLTRB(20, 20, 20, 4),
                     child: Text(
                       'الأذكار',
                       textDirection: TextDirection.rtl,
@@ -33,12 +34,12 @@ class AdhkarTabScreen extends StatelessWidget {
                         fontFamily: 'Amiri',
                         fontSize: 24,
                         fontWeight: FontWeight.w700,
-                        color: AppColors.textPrimary,
+                        color: AppColors.textP(context),
                       ),
                     ),
                   ),
-                  const Padding(
-                    padding: EdgeInsets.symmetric(horizontal: 20),
+                  Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 20),
                     child: Text(
                       'اختر قسمًا لبدء القراءة',
                       textDirection: TextDirection.rtl,
@@ -46,11 +47,16 @@ class AdhkarTabScreen extends StatelessWidget {
                       style: TextStyle(
                         fontFamily: 'Amiri',
                         fontSize: 14,
-                        color: AppColors.textSecondary,
+                        color: AppColors.textS(context),
                       ),
                     ),
                   ),
-                  const SizedBox(height: 16),
+                  const SizedBox(height: 12),
+
+                  // ── Accessibility bar ──
+                  const AccessibilityBar(),
+
+                  const SizedBox(height: 4),
 
                   // ── Category list ──
                   Expanded(
@@ -81,18 +87,20 @@ class AdhkarTabScreen extends StatelessWidget {
                             margin: const EdgeInsets.symmetric(vertical: 6),
                             padding: const EdgeInsets.all(16),
                             decoration: BoxDecoration(
-                              color: AppColors.white,
+                              color: AppColors.card(context),
                               borderRadius: BorderRadius.circular(16),
                               border: Border.all(
                                 color: isCompleted
                                     ? AppColors.counterCompleted
                                         .withValues(alpha: 0.3)
-                                    : AppColors.divider
+                                    : AppColors.dividerC(context)
                                         .withValues(alpha: 0.5),
                               ),
                               boxShadow: [
                                 BoxShadow(
-                                  color: AppColors.brown
+                                  color: (AppColors.isDark(context)
+                                          ? Colors.black
+                                          : AppColors.brown)
                                       .withValues(alpha: 0.04),
                                   blurRadius: 8,
                                   offset: const Offset(0, 2),
@@ -142,11 +150,11 @@ class AdhkarTabScreen extends StatelessWidget {
                                         category.title,
                                         textDirection: TextDirection.rtl,
                                         textAlign: TextAlign.right,
-                                        style: const TextStyle(
+                                        style: TextStyle(
                                           fontFamily: 'Amiri',
                                           fontSize: 17,
                                           fontWeight: FontWeight.w700,
-                                          color: AppColors.textPrimary,
+                                          color: AppColors.textP(context),
                                         ),
                                       ),
                                       const SizedBox(height: 2),
@@ -154,10 +162,10 @@ class AdhkarTabScreen extends StatelessWidget {
                                         '${category.completedCount} من ${category.totalCount} ذكر',
                                         textDirection: TextDirection.rtl,
                                         textAlign: TextAlign.right,
-                                        style: const TextStyle(
+                                        style: TextStyle(
                                           fontFamily: 'Amiri',
                                           fontSize: 13,
-                                          color: AppColors.textSecondary,
+                                          color: AppColors.textS(context),
                                         ),
                                       ),
                                       const SizedBox(height: 8),
@@ -169,7 +177,7 @@ class AdhkarTabScreen extends StatelessWidget {
                                           value: category.progress,
                                           minHeight: 5,
                                           backgroundColor:
-                                              AppColors.beigeDark,
+                                              AppColors.progressBg(context),
                                           valueColor:
                                               AlwaysStoppedAnimation<Color>(
                                             isCompleted

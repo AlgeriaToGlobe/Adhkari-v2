@@ -27,20 +27,22 @@ class _MainShellState extends State<MainShell> {
 
   @override
   Widget build(BuildContext context) {
+    final dark = AppColors.isDark(context);
+
     return Directionality(
       textDirection: TextDirection.rtl,
       child: Scaffold(
-        backgroundColor: AppColors.beigeLight,
+        backgroundColor: AppColors.scaffold(context),
         body: IndexedStack(
           index: _currentIndex,
           children: _screens,
         ),
         bottomNavigationBar: Container(
-          decoration: const BoxDecoration(
-            color: AppColors.cardBackground,
+          decoration: BoxDecoration(
+            color: AppColors.card(context),
             border: Border(
               top: BorderSide(
-                color: AppColors.divider,
+                color: AppColors.dividerC(context),
                 width: 0.5,
               ),
             ),
@@ -49,9 +51,9 @@ class _MainShellState extends State<MainShell> {
             currentIndex: _currentIndex,
             onTap: (index) => setState(() => _currentIndex = index),
             type: BottomNavigationBarType.fixed,
-            backgroundColor: AppColors.cardBackground,
-            selectedItemColor: AppColors.brown,
-            unselectedItemColor: AppColors.brownLight,
+            backgroundColor: AppColors.card(context),
+            selectedItemColor: dark ? AppColors.gold : AppColors.brown,
+            unselectedItemColor: AppColors.brownLightC(context),
             selectedFontSize: 12,
             unselectedFontSize: 11,
             selectedLabelStyle: const TextStyle(
