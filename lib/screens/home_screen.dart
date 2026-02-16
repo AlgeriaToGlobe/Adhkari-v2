@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../providers/adhkar_provider.dart';
 import '../theme/app_colors.dart';
+import '../utils/hijri_date.dart';
 import '../widgets/arch_header.dart';
 import '../widgets/diamond_divider.dart';
 import 'adhkar_list_screen.dart';
@@ -41,6 +42,11 @@ class HomeScreen extends StatelessWidget {
     final day = _arabicDays[now.weekday - 1];
     final month = _arabicMonths[now.month - 1];
     return '$day، ${now.day} $month ${now.year}';
+  }
+
+  String _formatHijriDate() {
+    final hijri = HijriDate.fromGregorian(DateTime.now());
+    return '${hijri.day} ${hijri.monthName} ${hijri.year} هـ';
   }
 
   @override
@@ -95,17 +101,35 @@ class HomeScreen extends StatelessWidget {
                           children: [
                             // Date text
                             Expanded(
-                              child: Text(
-                                _formatArabicDate(),
-                                textDirection: TextDirection.rtl,
-                                textAlign: TextAlign.right,
-                                style: const TextStyle(
-                                  fontFamily: 'Amiri',
-                                  fontSize: 15,
-                                  fontWeight: FontWeight.w700,
-                                  color: AppColors.textPrimary,
-                                  height: 1.4,
-                                ),
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(
+                                    _formatHijriDate(),
+                                    textDirection: TextDirection.rtl,
+                                    textAlign: TextAlign.right,
+                                    style: const TextStyle(
+                                      fontFamily: 'Amiri',
+                                      fontSize: 16,
+                                      fontWeight: FontWeight.w700,
+                                      color: AppColors.textPrimary,
+                                      height: 1.4,
+                                    ),
+                                  ),
+                                  const SizedBox(height: 2),
+                                  Text(
+                                    _formatArabicDate(),
+                                    textDirection: TextDirection.rtl,
+                                    textAlign: TextAlign.right,
+                                    style: TextStyle(
+                                      fontFamily: 'Amiri',
+                                      fontSize: 13,
+                                      color: AppColors.textSecondary
+                                          .withValues(alpha: 0.8),
+                                      height: 1.4,
+                                    ),
+                                  ),
+                                ],
                               ),
                             ),
                             const SizedBox(width: 12),
@@ -118,7 +142,7 @@ class HomeScreen extends StatelessWidget {
                                 color: AppColors.gold.withValues(alpha: 0.1),
                               ),
                               child: const Icon(
-                                Icons.calendar_today_rounded,
+                                Icons.calendar_month_rounded,
                                 size: 20,
                                 color: AppColors.gold,
                               ),
