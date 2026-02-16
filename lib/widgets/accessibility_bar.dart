@@ -3,8 +3,8 @@ import 'package:provider/provider.dart';
 import '../providers/settings_provider.dart';
 import '../theme/app_colors.dart';
 
-/// A compact accessibility toolbar for adhkar reading pages.
-/// Provides font size controls and dark/light mode toggle.
+/// A minimal accessibility toolbar for adhkar reading pages.
+/// Icons only: أ+ / أ- for font size, moon/sun for dark mode.
 class AccessibilityBar extends StatelessWidget {
   const AccessibilityBar({super.key});
 
@@ -15,7 +15,7 @@ class AccessibilityBar extends StatelessWidget {
     return Consumer<SettingsProvider>(
       builder: (context, settings, _) {
         return Container(
-          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
           decoration: BoxDecoration(
             color: dark ? AppColors.darkSurface : AppColors.beige,
             border: Border(
@@ -28,121 +28,66 @@ class AccessibilityBar extends StatelessWidget {
           child: Directionality(
             textDirection: TextDirection.rtl,
             child: Row(
+              mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                // ── Font size section ──
-                Icon(
-                  Icons.format_size_rounded,
-                  size: 18,
-                  color: AppColors.textS(context),
-                ),
-                const SizedBox(width: 10),
-
-                // Increase button
-                _ControlButton(
+                // ── Font increase ──
+                _IconBtn(
                   onTap: settings.canIncrease
                       ? () => settings.increaseFontSize()
                       : null,
                   dark: dark,
-                  child: Text(
+                  enabled: settings.canIncrease,
+                  child: const Text(
                     'أ+',
+                    textDirection: TextDirection.rtl,
                     style: TextStyle(
                       fontFamily: 'Amiri',
                       fontSize: 16,
                       fontWeight: FontWeight.w700,
-                      color: settings.canIncrease
-                          ? AppColors.gold
-                          : AppColors.dividerC(context),
                     ),
                   ),
                 ),
-                const SizedBox(width: 8),
+                const SizedBox(width: 12),
 
-                // Current size label pill
-                Container(
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 14, vertical: 4),
-                  decoration: BoxDecoration(
-                    color: AppColors.gold.withValues(alpha: 0.12),
-                    borderRadius: BorderRadius.circular(10),
-                    border: Border.all(
-                      color: AppColors.gold.withValues(alpha: 0.3),
-                    ),
-                  ),
-                  child: Text(
-                    settings.fontSizeLabel,
-                    style: const TextStyle(
-                      fontFamily: 'Amiri',
-                      fontSize: 13,
-                      fontWeight: FontWeight.w700,
-                      color: AppColors.gold,
-                    ),
-                  ),
-                ),
-                const SizedBox(width: 8),
-
-                // Decrease button
-                _ControlButton(
+                // ── Font decrease ──
+                _IconBtn(
                   onTap: settings.canDecrease
                       ? () => settings.decreaseFontSize()
                       : null,
                   dark: dark,
-                  child: Text(
+                  enabled: settings.canDecrease,
+                  child: const Text(
                     'أ-',
+                    textDirection: TextDirection.rtl,
                     style: TextStyle(
                       fontFamily: 'Amiri',
                       fontSize: 14,
                       fontWeight: FontWeight.w700,
-                      color: settings.canDecrease
-                          ? AppColors.gold
-                          : AppColors.dividerC(context),
                     ),
                   ),
                 ),
 
-                const Spacer(),
+                const SizedBox(width: 20),
 
                 // ── Vertical divider ──
                 Container(
                   width: 1,
-                  height: 28,
+                  height: 24,
                   color: AppColors.dividerC(context),
                 ),
-                const SizedBox(width: 14),
 
-                // ── Dark mode toggle ──
-                GestureDetector(
+                const SizedBox(width: 20),
+
+                // ── Dark mode toggle (icon only) ──
+                _IconBtn(
                   onTap: () => settings.toggleDarkMode(),
-                  child: Container(
-                    padding:
-                        const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-                    decoration: BoxDecoration(
-                      color: dark
-                          ? AppColors.gold.withValues(alpha: 0.12)
-                          : AppColors.brown.withValues(alpha: 0.08),
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                    child: Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        Icon(
-                          dark
-                              ? Icons.light_mode_rounded
-                              : Icons.dark_mode_rounded,
-                          size: 20,
-                          color: dark ? AppColors.gold : AppColors.brown,
-                        ),
-                        const SizedBox(width: 6),
-                        Text(
-                          dark ? 'فاتح' : 'داكن',
-                          style: TextStyle(
-                            fontFamily: 'Amiri',
-                            fontSize: 13,
-                            fontWeight: FontWeight.w700,
-                            color: dark ? AppColors.gold : AppColors.brown,
-                          ),
-                        ),
-                      ],
-                    ),
+                  dark: dark,
+                  enabled: true,
+                  child: Icon(
+                    dark
+                        ? Icons.light_mode_rounded
+                        : Icons.dark_mode_rounded,
+                    size: 20,
                   ),
                 ),
               ],
@@ -154,33 +99,45 @@ class AccessibilityBar extends StatelessWidget {
   }
 }
 
-class _ControlButton extends StatelessWidget {
+class _IconBtn extends StatelessWidget {
   final Widget child;
   final VoidCallback? onTap;
   final bool dark;
+  final bool enabled;
 
-  const _ControlButton({
+  const _IconBtn({
     required this.child,
     this.onTap,
     required this.dark,
+    required this.enabled,
   });
 
   @override
   Widget build(BuildContext context) {
+    final color = enabled ? AppColors.gold : AppColors.dividerC(context);
+
     return GestureDetector(
       onTap: onTap,
       child: Container(
-        width: 40,
+        width: 42,
         height: 36,
         alignment: Alignment.center,
         decoration: BoxDecoration(
           color: dark ? AppColors.darkCard : AppColors.white,
           borderRadius: BorderRadius.circular(10),
           border: Border.all(
-            color: dark ? AppColors.darkDivider : AppColors.divider,
+            color: enabled
+                ? AppColors.gold.withValues(alpha: 0.4)
+                : (dark ? AppColors.darkDivider : AppColors.divider),
           ),
         ),
-        child: child,
+        child: IconTheme(
+          data: IconThemeData(color: color),
+          child: DefaultTextStyle(
+            style: TextStyle(color: color),
+            child: child,
+          ),
+        ),
       ),
     );
   }
