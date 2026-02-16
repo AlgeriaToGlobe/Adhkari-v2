@@ -3,9 +3,9 @@ class Dhikr {
   final String id;
   final String text;
   final int targetCount;
-  final String? fadl; // Virtue/reward of this dhikr
-  final String? reference; // Hadith reference (e.g., البخاري ١٢٣٤)
-  final HadithGrade grade; // Authenticity grade
+  final String? fadl;
+  final String? reference;
+  final HadithGrade grade;
   final String? notes;
 
   int currentCount;
@@ -48,13 +48,50 @@ class Dhikr {
   }
 }
 
-enum HadithGrade {
-  sahih,    // صحيح
-  hasan,    // حسن
-  daif,     // ضعيف
-  mawdu,    // موضوع
-  mutawatir, // متواتر
+/// A user-created free dhikr item with its own counter and target.
+class FreeDhikrItem {
+  final String id;
+  String text;
+  int targetCount;
+  int currentCount;
+
+  bool get isCompleted => currentCount >= targetCount;
+  double get progress =>
+      targetCount > 0 ? (currentCount / targetCount).clamp(0.0, 1.0) : 0.0;
+
+  FreeDhikrItem({
+    required this.id,
+    required this.text,
+    this.targetCount = 100,
+    this.currentCount = 0,
+  });
+
+  void increment() {
+    if (currentCount < targetCount) {
+      currentCount++;
+    }
+  }
+
+  void reset() {
+    currentCount = 0;
+  }
+
+  Map<String, dynamic> toJson() => {
+        'id': id,
+        'text': text,
+        'targetCount': targetCount,
+        'currentCount': currentCount,
+      };
+
+  factory FreeDhikrItem.fromJson(Map<String, dynamic> json) => FreeDhikrItem(
+        id: json['id'] as String,
+        text: json['text'] as String,
+        targetCount: json['targetCount'] as int,
+        currentCount: json['currentCount'] as int? ?? 0,
+      );
 }
+
+enum HadithGrade { sahih, hasan, daif, mawdu, mutawatir }
 
 extension HadithGradeExtension on HadithGrade {
   String get arabicLabel {

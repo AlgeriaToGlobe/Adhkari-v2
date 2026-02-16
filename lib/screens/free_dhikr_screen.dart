@@ -1,145 +1,56 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../providers/adhkar_provider.dart';
+import '../models/dhikr.dart';
 import '../theme/app_colors.dart';
 
-class FreeDhikrScreen extends StatefulWidget {
+class FreeDhikrScreen extends StatelessWidget {
   const FreeDhikrScreen({super.key});
 
-  @override
-  State<FreeDhikrScreen> createState() => _FreeDhikrScreenState();
-}
+  void _showAddDialog(BuildContext context) {
+    final textController = TextEditingController();
+    final countController = TextEditingController(text: '100');
 
-class _FreeDhikrScreenState extends State<FreeDhikrScreen>
-    with SingleTickerProviderStateMixin {
-  late AnimationController _pulseController;
-  late Animation<double> _pulseAnimation;
-  final TextEditingController _labelController = TextEditingController();
-
-  final List<String> _presetDhikr = [
-    'سبحان الله',
-    'الحمد لله',
-    'الله أكبر',
-    'لا إله إلا الله',
-    'أستغفر الله',
-    'لا حول ولا قوة إلا بالله',
-    'سبحان الله وبحمده',
-    'سبحان الله العظيم',
-  ];
-
-  @override
-  void initState() {
-    super.initState();
-    _pulseController = AnimationController(
-      duration: const Duration(milliseconds: 200),
-      vsync: this,
-    );
-    _pulseAnimation = Tween<double>(begin: 1.0, end: 0.95).animate(
-      CurvedAnimation(parent: _pulseController, curve: Curves.easeInOut),
-    );
-  }
-
-  @override
-  void dispose() {
-    _pulseController.dispose();
-    _labelController.dispose();
-    super.dispose();
-  }
-
-  void _onCounterTap(AdhkarProvider provider) {
-    _pulseController.forward().then((_) => _pulseController.reverse());
-    provider.incrementFreeDhikr();
-  }
-
-  void _showLabelPicker(BuildContext context, AdhkarProvider provider) {
-    showModalBottomSheet(
+    showDialog(
       context: context,
-      backgroundColor: AppColors.beigeLight,
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
-      ),
       builder: (ctx) {
         return Directionality(
           textDirection: TextDirection.rtl,
-          child: Padding(
-            padding: const EdgeInsets.all(20),
-            child: Column(
+          child: AlertDialog(
+            backgroundColor: AppColors.cardBackground,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(16),
+            ),
+            title: const Text(
+              'إضافة ذكر جديد',
+              textAlign: TextAlign.center,
+              style: TextStyle(
+                fontFamily: 'Amiri',
+                fontSize: 20,
+                fontWeight: FontWeight.bold,
+                color: AppColors.textPrimary,
+              ),
+            ),
+            content: Column(
               mainAxisSize: MainAxisSize.min,
-              crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
-                const Text(
-                  'اختر الذكر',
-                  textAlign: TextAlign.center,
-                  textDirection: TextDirection.rtl,
-                  style: TextStyle(
-                    fontFamily: 'Amiri',
-                    fontSize: 20,
-                    fontWeight: FontWeight.w700,
-                    color: AppColors.textPrimary,
-                  ),
-                ),
-                const SizedBox(height: 16),
-                Wrap(
-                  spacing: 8,
-                  runSpacing: 8,
-                  alignment: WrapAlignment.center,
-                  children: _presetDhikr.map((dhikr) {
-                    final isSelected = dhikr == provider.freeDhikrLabel;
-                    return GestureDetector(
-                      onTap: () {
-                        provider.setFreeDhikrLabel(dhikr);
-                        Navigator.pop(ctx);
-                      },
-                      child: Container(
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 16,
-                          vertical: 8,
-                        ),
-                        decoration: BoxDecoration(
-                          color: isSelected
-                              ? AppColors.gold
-                              : AppColors.cardBackground,
-                          borderRadius: BorderRadius.circular(20),
-                          border: Border.all(
-                            color: isSelected
-                                ? AppColors.gold
-                                : AppColors.divider,
-                          ),
-                        ),
-                        child: Text(
-                          dhikr,
-                          style: TextStyle(
-                            fontFamily: 'Amiri',
-                            fontSize: 16,
-                            fontWeight: FontWeight.w700,
-                            color: isSelected
-                                ? AppColors.brownDark
-                                : AppColors.textPrimary,
-                          ),
-                        ),
-                      ),
-                    );
-                  }).toList(),
-                ),
-                const SizedBox(height: 16),
-                // Custom input
                 TextField(
-                  controller: _labelController,
+                  controller: textController,
                   textDirection: TextDirection.rtl,
                   textAlign: TextAlign.right,
                   style: const TextStyle(
                     fontFamily: 'Amiri',
                     fontSize: 16,
+                    color: AppColors.textPrimary,
                   ),
                   decoration: InputDecoration(
-                    hintText: 'أو اكتب ذكرًا مخصصًا...',
-                    hintTextDirection: TextDirection.rtl,
+                    hintText: 'نص الذكر',
                     hintStyle: TextStyle(
                       fontFamily: 'Amiri',
-                      color: AppColors.brownLight.withValues(alpha: 0.5),
+                      color: AppColors.textSecondary.withValues(alpha: 0.6),
                     ),
                     filled: true,
-                    fillColor: AppColors.cardBackground,
+                    fillColor: AppColors.beigeLight,
                     border: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(12),
                       borderSide: const BorderSide(color: AppColors.divider),
@@ -152,29 +63,141 @@ class _FreeDhikrScreenState extends State<FreeDhikrScreen>
                       borderRadius: BorderRadius.circular(12),
                       borderSide: const BorderSide(color: AppColors.gold),
                     ),
-                    suffixIcon: IconButton(
-                      icon: const Icon(Icons.check, color: AppColors.gold),
-                      onPressed: () {
-                        if (_labelController.text.trim().isNotEmpty) {
-                          provider
-                              .setFreeDhikrLabel(_labelController.text.trim());
-                          _labelController.clear();
-                          Navigator.pop(ctx);
-                        }
-                      },
+                  ),
+                ),
+                const SizedBox(height: 12),
+                TextField(
+                  controller: countController,
+                  textDirection: TextDirection.rtl,
+                  textAlign: TextAlign.right,
+                  keyboardType: TextInputType.number,
+                  style: const TextStyle(
+                    fontFamily: 'Amiri',
+                    fontSize: 16,
+                    color: AppColors.textPrimary,
+                  ),
+                  decoration: InputDecoration(
+                    hintText: 'عدد مرات التكرار',
+                    hintStyle: TextStyle(
+                      fontFamily: 'Amiri',
+                      color: AppColors.textSecondary.withValues(alpha: 0.6),
+                    ),
+                    filled: true,
+                    fillColor: AppColors.beigeLight,
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(12),
+                      borderSide: const BorderSide(color: AppColors.divider),
+                    ),
+                    enabledBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(12),
+                      borderSide: const BorderSide(color: AppColors.divider),
+                    ),
+                    focusedBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(12),
+                      borderSide: const BorderSide(color: AppColors.gold),
                     ),
                   ),
-                  onSubmitted: (value) {
-                    if (value.trim().isNotEmpty) {
-                      provider.setFreeDhikrLabel(value.trim());
-                      _labelController.clear();
-                      Navigator.pop(ctx);
-                    }
-                  },
                 ),
-                const SizedBox(height: 16),
               ],
             ),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.pop(ctx),
+                child: const Text(
+                  'إلغاء',
+                  style: TextStyle(
+                    fontFamily: 'Amiri',
+                    color: AppColors.textSecondary,
+                  ),
+                ),
+              ),
+              TextButton(
+                onPressed: () {
+                  final text = textController.text.trim();
+                  final countText = countController.text.trim();
+                  if (text.isNotEmpty && countText.isNotEmpty) {
+                    final count = int.tryParse(countText);
+                    if (count != null && count > 0) {
+                      context
+                          .read<AdhkarProvider>()
+                          .addFreeDhikrItem(text, count);
+                      Navigator.pop(ctx);
+                    }
+                  }
+                },
+                child: const Text(
+                  'إضافة',
+                  style: TextStyle(
+                    fontFamily: 'Amiri',
+                    fontWeight: FontWeight.bold,
+                    color: AppColors.gold,
+                  ),
+                ),
+              ),
+            ],
+          ),
+        );
+      },
+    );
+  }
+
+  void _showDeleteConfirmDialog(
+      BuildContext context, AdhkarProvider provider, String itemId) {
+    showDialog(
+      context: context,
+      builder: (ctx) {
+        return Directionality(
+          textDirection: TextDirection.rtl,
+          child: AlertDialog(
+            backgroundColor: AppColors.cardBackground,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(16),
+            ),
+            title: const Text(
+              'حذف الذكر',
+              textAlign: TextAlign.center,
+              style: TextStyle(
+                fontFamily: 'Amiri',
+                fontSize: 20,
+                fontWeight: FontWeight.bold,
+                color: AppColors.textPrimary,
+              ),
+            ),
+            content: const Text(
+              'هل تريد حذف هذا الذكر؟',
+              textAlign: TextAlign.right,
+              style: TextStyle(
+                fontFamily: 'Amiri',
+                fontSize: 16,
+                color: AppColors.textSecondary,
+              ),
+            ),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.pop(ctx),
+                child: const Text(
+                  'إلغاء',
+                  style: TextStyle(
+                    fontFamily: 'Amiri',
+                    color: AppColors.textSecondary,
+                  ),
+                ),
+              ),
+              TextButton(
+                onPressed: () {
+                  provider.removeFreeDhikrItem(itemId);
+                  Navigator.pop(ctx);
+                },
+                child: const Text(
+                  'حذف',
+                  style: TextStyle(
+                    fontFamily: 'Amiri',
+                    fontWeight: FontWeight.bold,
+                    color: Colors.red,
+                  ),
+                ),
+              ),
+            ],
           ),
         );
       },
@@ -187,180 +210,286 @@ class _FreeDhikrScreenState extends State<FreeDhikrScreen>
       textDirection: TextDirection.rtl,
       child: Scaffold(
         backgroundColor: AppColors.beigeLight,
-        appBar: AppBar(
-          title: const Text('التسبيح الحر'),
-          backgroundColor: AppColors.brown,
-          foregroundColor: AppColors.white,
-          centerTitle: true,
-        ),
-        body: Consumer<AdhkarProvider>(
-          builder: (context, provider, _) {
-            return Column(
-              children: [
-                const Spacer(flex: 1),
+        body: SafeArea(
+          child: Consumer<AdhkarProvider>(
+            builder: (context, provider, _) {
+              final items = provider.freeDhikrItems;
 
-                // Current dhikr label
-                GestureDetector(
-                  onTap: () => _showLabelPicker(context, provider),
-                  child: Container(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 24,
-                      vertical: 12,
-                    ),
-                    decoration: BoxDecoration(
-                      color: AppColors.gold.withValues(alpha: 0.1),
-                      borderRadius: BorderRadius.circular(20),
-                      border: Border.all(
-                        color: AppColors.gold.withValues(alpha: 0.3),
-                      ),
-                    ),
-                    child: Row(
-                      mainAxisSize: MainAxisSize.min,
-                      textDirection: TextDirection.rtl,
-                      children: [
+              return Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  // ── Title section ──
+                  Padding(
+                    padding: const EdgeInsets.fromLTRB(16, 20, 16, 8),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: const [
                         Text(
-                          provider.freeDhikrLabel,
-                          textDirection: TextDirection.rtl,
-                          style: const TextStyle(
+                          'الذكر الحر',
+                          style: TextStyle(
                             fontFamily: 'Amiri',
-                            fontSize: 22,
-                            fontWeight: FontWeight.w700,
-                            color: AppColors.brown,
+                            fontSize: 24,
+                            fontWeight: FontWeight.bold,
+                            color: AppColors.textPrimary,
                           ),
                         ),
-                        const SizedBox(width: 8),
-                        Icon(
-                          Icons.edit,
-                          size: 18,
-                          color: AppColors.gold.withValues(alpha: 0.6),
+                        SizedBox(height: 4),
+                        Text(
+                          'أضف أذكارك الخاصة',
+                          style: TextStyle(
+                            fontFamily: 'Amiri',
+                            fontSize: 14,
+                            color: AppColors.textSecondary,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+
+                  // ── Add button ──
+                  Padding(
+                    padding:
+                        const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                    child: Material(
+                      color: AppColors.gold,
+                      borderRadius: BorderRadius.circular(12),
+                      child: InkWell(
+                        onTap: () => _showAddDialog(context),
+                        borderRadius: BorderRadius.circular(12),
+                        child: Padding(
+                          padding: const EdgeInsets.symmetric(vertical: 14),
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: const [
+                              Icon(
+                                Icons.add_circle_outline,
+                                color: AppColors.brownDark,
+                                size: 22,
+                              ),
+                              SizedBox(width: 8),
+                              Text(
+                                'إضافة ذكر جديد',
+                                style: TextStyle(
+                                  fontFamily: 'Amiri',
+                                  fontSize: 16,
+                                  fontWeight: FontWeight.bold,
+                                  color: AppColors.brownDark,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
+
+                  const SizedBox(height: 4),
+
+                  // ── List or empty state ──
+                  Expanded(
+                    child: items.isEmpty
+                        ? _buildEmptyState()
+                        : ListView.builder(
+                            padding: const EdgeInsets.symmetric(
+                                horizontal: 16, vertical: 6),
+                            itemCount: items.length,
+                            itemBuilder: (context, index) {
+                              final item = items[index];
+                              return _buildDhikrCard(
+                                  context, provider, item);
+                            },
+                          ),
+                  ),
+                ],
+              );
+            },
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildEmptyState() {
+    return Center(
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Icon(
+            Icons.edit_note,
+            size: 64,
+            color: AppColors.gold.withValues(alpha: 0.3),
+          ),
+          const SizedBox(height: 16),
+          const Text(
+            'لا توجد أذكار مضافة',
+            style: TextStyle(
+              fontFamily: 'Amiri',
+              fontSize: 18,
+              color: AppColors.textSecondary,
+            ),
+          ),
+          const SizedBox(height: 8),
+          const Text(
+            'اضغط الزر أعلاه لإضافة ذكر جديد',
+            style: TextStyle(
+              fontFamily: 'Amiri',
+              fontSize: 14,
+              color: AppColors.textSecondary,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildDhikrCard(
+      BuildContext context, AdhkarProvider provider, FreeDhikrItem item) {
+    final progressColor =
+        item.isCompleted ? AppColors.counterCompleted : AppColors.gold;
+
+    return Container(
+      margin: const EdgeInsets.symmetric(horizontal: 0, vertical: 6),
+      decoration: BoxDecoration(
+        color: AppColors.white,
+        borderRadius: BorderRadius.circular(16),
+        boxShadow: [
+          BoxShadow(
+            color: AppColors.brown.withValues(alpha: 0.06),
+            blurRadius: 8,
+            offset: const Offset(0, 2),
+          ),
+        ],
+      ),
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 14),
+        child: Row(
+          children: [
+            // ── Right side: circular progress indicator (tappable) ──
+            GestureDetector(
+              onTap: () => provider.incrementFreeDhikrItem(item.id),
+              child: SizedBox(
+                width: 56,
+                height: 56,
+                child: Stack(
+                  alignment: Alignment.center,
+                  children: [
+                    SizedBox(
+                      width: 56,
+                      height: 56,
+                      child: CircularProgressIndicator(
+                        value: item.progress,
+                        strokeWidth: 4,
+                        backgroundColor: AppColors.counterBackground,
+                        valueColor:
+                            AlwaysStoppedAnimation<Color>(progressColor),
+                      ),
+                    ),
+                    Text(
+                      '${item.currentCount}/${item.targetCount}',
+                      textAlign: TextAlign.center,
+                      style: TextStyle(
+                        fontFamily: 'Amiri',
+                        fontSize: 10,
+                        fontWeight: FontWeight.bold,
+                        color: progressColor,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+
+            const SizedBox(width: 12),
+
+            // ── Center: text and count info ──
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    item.text,
+                    style: const TextStyle(
+                      fontFamily: 'Amiri',
+                      fontSize: 18,
+                      fontWeight: FontWeight.bold,
+                      color: AppColors.textPrimary,
+                    ),
+                    maxLines: 2,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                  const SizedBox(height: 4),
+                  Text(
+                    '${item.currentCount} من ${item.targetCount}',
+                    style: const TextStyle(
+                      fontFamily: 'Amiri',
+                      fontSize: 13,
+                      color: AppColors.textSecondary,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+
+            // ── Left side: popup menu ──
+            PopupMenuButton<String>(
+              icon: const Icon(
+                Icons.more_vert,
+                color: AppColors.textSecondary,
+              ),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(12),
+              ),
+              color: AppColors.cardBackground,
+              onSelected: (value) {
+                if (value == 'reset') {
+                  provider.resetFreeDhikrItem(item.id);
+                } else if (value == 'delete') {
+                  _showDeleteConfirmDialog(context, provider, item.id);
+                }
+              },
+              itemBuilder: (ctx) => [
+                PopupMenuItem<String>(
+                  value: 'reset',
+                  child: Directionality(
+                    textDirection: TextDirection.rtl,
+                    child: Row(
+                      children: const [
+                        Icon(Icons.refresh, size: 20, color: AppColors.gold),
+                        SizedBox(width: 8),
+                        Text(
+                          'إعادة العداد',
+                          style: TextStyle(
+                            fontFamily: 'Amiri',
+                            color: AppColors.textPrimary,
+                          ),
                         ),
                       ],
                     ),
                   ),
                 ),
-
-                const Spacer(flex: 1),
-
-                // Counter display
-                Text(
-                  '${provider.freeDhikrCount}',
-                  style: const TextStyle(
-                    fontFamily: 'Amiri',
-                    fontSize: 72,
-                    fontWeight: FontWeight.w700,
-                    color: AppColors.brown,
-                    height: 1.0,
-                  ),
-                ),
-
-                const SizedBox(height: 8),
-                Text(
-                  'مرة',
-                  textDirection: TextDirection.rtl,
-                  style: TextStyle(
-                    fontFamily: 'Amiri',
-                    fontSize: 18,
-                    color: AppColors.brownLight.withValues(alpha: 0.7),
-                  ),
-                ),
-
-                const Spacer(flex: 1),
-
-                // Big counter button
-                GestureDetector(
-                  onTap: () => _onCounterTap(provider),
-                  child: AnimatedBuilder(
-                    animation: _pulseAnimation,
-                    builder: (context, child) {
-                      return Transform.scale(
-                        scale: _pulseAnimation.value,
-                        child: child,
-                      );
-                    },
-                    child: Container(
-                      width: 160,
-                      height: 160,
-                      decoration: BoxDecoration(
-                        shape: BoxShape.circle,
-                        gradient: const LinearGradient(
-                          begin: Alignment.topCenter,
-                          end: Alignment.bottomCenter,
-                          colors: [AppColors.gold, AppColors.goldDark],
-                        ),
-                        boxShadow: [
-                          BoxShadow(
-                            color: AppColors.gold.withValues(alpha: 0.4),
-                            blurRadius: 20,
-                            offset: const Offset(0, 6),
-                          ),
-                        ],
-                      ),
-                      child: const Center(
-                        child: Icon(
-                          Icons.touch_app,
-                          size: 56,
-                          color: AppColors.white,
-                        ),
-                      ),
-                    ),
-                  ),
-                ),
-
-                const Spacer(flex: 1),
-
-                // Reset button
-                TextButton.icon(
-                  onPressed: () {
-                    showDialog(
-                      context: context,
-                      builder: (ctx) => Directionality(
-                        textDirection: TextDirection.rtl,
-                        child: AlertDialog(
-                          title: const Text(
-                            'إعادة العداد',
-                            textAlign: TextAlign.right,
-                            textDirection: TextDirection.rtl,
-                          ),
-                          content: const Text(
-                            'هل تريد إعادة العداد إلى صفر؟',
-                            textAlign: TextAlign.right,
-                            textDirection: TextDirection.rtl,
-                          ),
-                          actions: [
-                            TextButton(
-                              onPressed: () => Navigator.pop(ctx),
-                              child: const Text('إلغاء'),
-                            ),
-                            TextButton(
-                              onPressed: () {
-                                provider.resetFreeDhikr();
-                                Navigator.pop(ctx);
-                              },
-                              child: const Text('إعادة'),
-                            ),
-                          ],
-                        ),
-                      ),
-                    );
-                  },
-                  icon: const Icon(
-                    Icons.refresh,
-                    color: AppColors.brownLight,
-                  ),
-                  label: const Text(
-                    'إعادة العداد',
+                PopupMenuItem<String>(
+                  value: 'delete',
+                  child: Directionality(
                     textDirection: TextDirection.rtl,
-                    style: TextStyle(
-                      fontFamily: 'Amiri',
-                      color: AppColors.brownLight,
+                    child: Row(
+                      children: const [
+                        Icon(Icons.delete_outline,
+                            size: 20, color: Colors.red),
+                        SizedBox(width: 8),
+                        Text(
+                          'حذف',
+                          style: TextStyle(
+                            fontFamily: 'Amiri',
+                            color: Colors.red,
+                          ),
+                        ),
+                      ],
                     ),
                   ),
                 ),
-
-                const SizedBox(height: 32),
               ],
-            );
-          },
+            ),
+          ],
         ),
       ),
     );

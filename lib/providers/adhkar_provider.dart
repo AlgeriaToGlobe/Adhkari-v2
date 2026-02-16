@@ -1,15 +1,26 @@
+import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../models/adhkar_category.dart';
+import '../models/dhikr.dart';
 import '../data/sample_data.dart';
 
 class AdhkarProvider extends ChangeNotifier {
   List<AdhkarCategory> _categories = [];
-  int _freeDhikrCount = 0;
-  String _freeDhikrLabel = 'سبحان الله';
+  List<FreeDhikrItem> _freeDhikrItems = [];
+  bool _vibrationEnabled = true;
+
+  // Tasbeeh state
+  int _tasbeehCount = 0;
+  int _tasbeehTarget = 33;
+  String _tasbeehLabel = 'سبحان الله';
+
   List<AdhkarCategory> get categories => _categories;
-  int get freeDhikrCount => _freeDhikrCount;
-  String get freeDhikrLabel => _freeDhikrLabel;
+  List<FreeDhikrItem> get freeDhikrItems => _freeDhikrItems;
+  bool get vibrationEnabled => _vibrationEnabled;
+  int get tasbeehCount => _tasbeehCount;
+  int get tasbeehTarget => _tasbeehTarget;
+  String get tasbeehLabel => _tasbeehLabel;
 
   int get totalAdhkar =>
       _categories.fold(0, (sum, cat) => sum + cat.totalCount);
@@ -26,19 +37,16 @@ class AdhkarProvider extends ChangeNotifier {
     _categories = SampleData.getCategories();
     final prefs = await SharedPreferences.getInstance();
 
-    // Check if we need a daily reset
     final lastReset = prefs.getString('lastResetDate');
     final today = DateTime.now().toIso8601String().substring(0, 10);
     if (lastReset != today) {
       await prefs.setString('lastResetDate', today);
-      // Reset all counts for a new day
       for (final category in _categories) {
         for (final dhikr in category.adhkar) {
           await prefs.setInt('count_${dhikr.id}', 0);
         }
       }
     } else {
-      // Restore saved counts
       for (final category in _categories) {
         for (final dhikr in category.adhkar) {
           dhikr.currentCount = prefs.getInt('count_${dhikr.id}') ?? 0;
@@ -46,15 +54,29 @@ class AdhkarProvider extends ChangeNotifier {
       }
     }
 
-    _freeDhikrCount = prefs.getInt('freeDhikrCount') ?? 0;
-    _freeDhikrLabel = prefs.getString('freeDhikrLabel') ?? 'سبحان الله';
+    _vibrationEnabled = prefs.getBool('vibrationEnabled') ?? true;
+
+    // Load tasbeeh
+    _tasbeehCount = prefs.getInt('tasbeehCount') ?? 0;
+    _tasbeehTarget = prefs.getInt('tasbeehTarget') ?? 33;
+    _tasbeehLabel = prefs.getString('tasbeehLabel') ?? 'سبحان الله';
+
+    // Load free dhikr items
+    final itemsJson = prefs.getString('freeDhikrItems');
+    if (itemsJson != null) {
+      final List<dynamic> decoded = jsonDecode(itemsJson);
+      _freeDhikrItems =
+          decoded.map((e) => FreeDhikrItem.fromJson(e)).toList();
+    }
+
     notifyListeners();
   }
+
+  // ── Adhkar category methods ──
 
   Future<void> incrementDhikr(String categoryId, String dhikrId) async {
     final category = _categories.firstWhere((c) => c.id == categoryId);
     final dhikr = category.adhkar.firstWhere((d) => d.id == dhikrId);
-
     if (!dhikr.isCompleted) {
       dhikr.increment();
       final prefs = await SharedPreferences.getInstance();
@@ -73,24 +95,20 @@ class AdhkarProvider extends ChangeNotifier {
     notifyListeners();
   }
 
-  Future<void> incrementFreeDhikr() async {
-    _freeDhikrCount++;
+  Future<void> resetAllProgress() async {
     final prefs = await SharedPreferences.getInstance();
-    await prefs.setInt('freeDhikrCount', _freeDhikrCount);
-    notifyListeners();
-  }
-
-  Future<void> resetFreeDhikr() async {
-    _freeDhikrCount = 0;
-    final prefs = await SharedPreferences.getInstance();
-    await prefs.setInt('freeDhikrCount', 0);
-    notifyListeners();
-  }
-
-  Future<void> setFreeDhikrLabel(String label) async {
-    _freeDhikrLabel = label;
-    final prefs = await SharedPreferences.getInstance();
-    await prefs.setString('freeDhikrLabel', label);
+    for (final category in _categories) {
+      for (final dhikr in category.adhkar) {
+        dhikr.reset();
+        await prefs.setInt('count_${dhikr.id}', 0);
+      }
+    }
+    _tasbeehCount = 0;
+    await prefs.setInt('tasbeehCount', 0);
+    for (final item in _freeDhikrItems) {
+      item.reset();
+    }
+    await _saveFreeDhikrItems();
     notifyListeners();
   }
 
@@ -100,5 +118,87 @@ class AdhkarProvider extends ChangeNotifier {
     } catch (_) {
       return null;
     }
+  }
+
+  // ── Tasbeeh methods ──
+
+  Future<void> incrementTasbeeh() async {
+    if (_tasbeehCount < _tasbeehTarget) {
+      _tasbeehCount++;
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.setInt('tasbeehCount', _tasbeehCount);
+      notifyListeners();
+    }
+  }
+
+  Future<void> resetTasbeeh() async {
+    _tasbeehCount = 0;
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setInt('tasbeehCount', 0);
+    notifyListeners();
+  }
+
+  Future<void> setTasbeehTarget(int target) async {
+    _tasbeehTarget = target;
+    if (_tasbeehCount > target) _tasbeehCount = 0;
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setInt('tasbeehTarget', target);
+    await prefs.setInt('tasbeehCount', _tasbeehCount);
+    notifyListeners();
+  }
+
+  Future<void> setTasbeehLabel(String label) async {
+    _tasbeehLabel = label;
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setString('tasbeehLabel', label);
+    notifyListeners();
+  }
+
+  // ── Free Dhikr list methods ──
+
+  Future<void> addFreeDhikrItem(String text, int target) async {
+    final item = FreeDhikrItem(
+      id: 'free_${DateTime.now().millisecondsSinceEpoch}',
+      text: text,
+      targetCount: target,
+    );
+    _freeDhikrItems.add(item);
+    await _saveFreeDhikrItems();
+    notifyListeners();
+  }
+
+  Future<void> removeFreeDhikrItem(String id) async {
+    _freeDhikrItems.removeWhere((item) => item.id == id);
+    await _saveFreeDhikrItems();
+    notifyListeners();
+  }
+
+  Future<void> incrementFreeDhikrItem(String id) async {
+    final item = _freeDhikrItems.firstWhere((i) => i.id == id);
+    item.increment();
+    await _saveFreeDhikrItems();
+    notifyListeners();
+  }
+
+  Future<void> resetFreeDhikrItem(String id) async {
+    final item = _freeDhikrItems.firstWhere((i) => i.id == id);
+    item.reset();
+    await _saveFreeDhikrItems();
+    notifyListeners();
+  }
+
+  Future<void> _saveFreeDhikrItems() async {
+    final prefs = await SharedPreferences.getInstance();
+    final json = jsonEncode(_freeDhikrItems.map((e) => e.toJson()).toList());
+    await prefs.setString('freeDhikrItems', json);
+  }
+
+  // ── Settings ──
+
+  Future<void> setVibrationEnabled(bool value) async {
+    _vibrationEnabled = value;
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setBool('vibrationEnabled', value);
+    notifyListeners();
   }
 }
