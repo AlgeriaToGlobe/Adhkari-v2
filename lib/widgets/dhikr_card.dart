@@ -56,6 +56,7 @@ class _DhikrCardState extends State<DhikrCard>
   @override
   Widget build(BuildContext context) {
     final dhikr = widget.dhikr;
+    final dark = AppColors.isDark(context);
 
     return GestureDetector(
       onTap: _handleTap,
@@ -72,18 +73,19 @@ class _DhikrCardState extends State<DhikrCard>
           padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 28),
           decoration: BoxDecoration(
             color: dhikr.isCompleted
-                ? AppColors.counterCompleted.withValues(alpha: 0.04)
-                : AppColors.cardBackground,
+                ? AppColors.counterCompleted.withValues(alpha: dark ? 0.08 : 0.04)
+                : AppColors.card(context),
             borderRadius: BorderRadius.circular(20),
             border: Border.all(
               color: dhikr.isCompleted
                   ? AppColors.counterCompleted.withValues(alpha: 0.2)
-                  : AppColors.divider.withValues(alpha: 0.6),
+                  : AppColors.dividerC(context).withValues(alpha: 0.6),
               width: 1,
             ),
             boxShadow: [
               BoxShadow(
-                color: AppColors.brown.withValues(alpha: 0.04),
+                color: (dark ? Colors.black : AppColors.brown)
+                    .withValues(alpha: dark ? 0.15 : 0.04),
                 blurRadius: 12,
                 offset: const Offset(0, 4),
               ),
@@ -96,11 +98,11 @@ class _DhikrCardState extends State<DhikrCard>
                 dhikr.text,
                 textAlign: TextAlign.center,
                 textDirection: TextDirection.rtl,
-                style: const TextStyle(
+                style: TextStyle(
                   fontFamily: 'Amiri',
                   fontSize: 22,
                   fontWeight: FontWeight.w400,
-                  color: AppColors.textPrimary,
+                  color: AppColors.textP(context),
                   height: 2.0,
                 ),
               ),
@@ -122,7 +124,7 @@ class _DhikrCardState extends State<DhikrCard>
                   padding:
                       const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
                   decoration: BoxDecoration(
-                    color: AppColors.gold.withValues(alpha: 0.06),
+                    color: AppColors.gold.withValues(alpha: dark ? 0.1 : 0.06),
                     borderRadius: BorderRadius.circular(10),
                   ),
                   child: Text(
@@ -132,7 +134,7 @@ class _DhikrCardState extends State<DhikrCard>
                     style: TextStyle(
                       fontFamily: 'Amiri',
                       fontSize: 14,
-                      color: AppColors.brownLight.withValues(alpha: 0.8),
+                      color: AppColors.brownLightC(context).withValues(alpha: 0.8),
                       height: 1.6,
                     ),
                   ),
@@ -159,7 +161,7 @@ class _DhikrCardState extends State<DhikrCard>
                           style: TextStyle(
                             fontFamily: 'Amiri',
                             fontSize: 12,
-                            color: AppColors.brownLight.withValues(alpha: 0.6),
+                            color: AppColors.brownLightC(context).withValues(alpha: 0.6),
                           ),
                         ),
                       ),

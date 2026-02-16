@@ -35,6 +35,50 @@ class AppColors {
   static const Color counterCompleted = Color(0xFF6B8E5B);
   static const Color counterBackground = Color(0xFFF5EFE4);
 
+  // ── Dark mode palette ──
+  static const Color darkBg = Color(0xFF1A1410);
+  static const Color darkSurface = Color(0xFF241C14);
+  static const Color darkCard = Color(0xFF2E2318);
+  static const Color darkDivider = Color(0xFF3D3228);
+  static const Color darkTextPrimary = Color(0xFFF5EFE4);
+  static const Color darkTextSecondary = Color(0xFFB5A898);
+  static const Color darkProgressBg = Color(0xFF3D3228);
+  static const Color darkBarBg = Color(0xFF211A12);
+
+  // ── Context-aware color helpers ──
+  static bool isDark(BuildContext context) =>
+      Theme.of(context).brightness == Brightness.dark;
+
+  static Color scaffold(BuildContext context) =>
+      isDark(context) ? darkBg : beigeLight;
+
+  static Color card(BuildContext context) =>
+      isDark(context) ? darkCard : cardBackground;
+
+  static Color surface(BuildContext context) =>
+      isDark(context) ? darkSurface : beigeWarm;
+
+  static Color textP(BuildContext context) =>
+      isDark(context) ? darkTextPrimary : textPrimary;
+
+  static Color textS(BuildContext context) =>
+      isDark(context) ? darkTextSecondary : textSecondary;
+
+  static Color dividerC(BuildContext context) =>
+      isDark(context) ? darkDivider : divider;
+
+  static Color progressBg(BuildContext context) =>
+      isDark(context) ? darkProgressBg : beigeDark;
+
+  static Color barBg(BuildContext context) =>
+      isDark(context) ? darkBarBg : beige;
+
+  static Color brownC(BuildContext context) =>
+      isDark(context) ? gold : brown;
+
+  static Color brownLightC(BuildContext context) =>
+      isDark(context) ? darkTextSecondary : brownLight;
+
   // ── Gradient presets ──
   static const LinearGradient headerGradient = LinearGradient(
     begin: Alignment.topCenter,

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../providers/adhkar_provider.dart';
+import '../providers/settings_provider.dart';
 import '../services/notification_service.dart';
 import '../theme/app_colors.dart';
 
@@ -103,37 +104,37 @@ class _SettingsScreenState extends State<SettingsScreen> {
         return Directionality(
           textDirection: TextDirection.rtl,
           child: AlertDialog(
-            backgroundColor: AppColors.white,
+            backgroundColor: AppColors.card(context),
             shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(16),
             ),
-            title: const Text(
+            title: Text(
               'إعادة جميع العدادات',
               style: TextStyle(
                 fontFamily: 'Amiri',
                 fontSize: 18,
                 fontWeight: FontWeight.bold,
-                color: AppColors.textPrimary,
+                color: AppColors.textP(context),
               ),
             ),
-            content: const Text(
+            content: Text(
               'هل أنت متأكد من إعادة جميع العدادات إلى الصفر؟ لا يمكن التراجع عن هذا الإجراء.',
               style: TextStyle(
                 fontFamily: 'Amiri',
                 fontSize: 15,
-                color: AppColors.textSecondary,
+                color: AppColors.textS(context),
                 height: 1.7,
               ),
             ),
             actions: [
               TextButton(
                 onPressed: () => Navigator.pop(context, false),
-                child: const Text(
+                child: Text(
                   'إلغاء',
                   style: TextStyle(
                     fontFamily: 'Amiri',
                     fontSize: 15,
-                    color: AppColors.textSecondary,
+                    color: AppColors.textS(context),
                   ),
                 ),
               ),
@@ -177,14 +178,16 @@ class _SettingsScreenState extends State<SettingsScreen> {
   }
 
   Widget _buildSectionContainer({required Widget child}) {
-    return Container(
-      padding: const EdgeInsets.all(4),
-      decoration: BoxDecoration(
-        color: AppColors.white,
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: AppColors.divider),
+    return Builder(
+      builder: (context) => Container(
+        padding: const EdgeInsets.all(4),
+        decoration: BoxDecoration(
+          color: AppColors.card(context),
+          borderRadius: BorderRadius.circular(12),
+          border: Border.all(color: AppColors.dividerC(context)),
+        ),
+        child: child,
       ),
-      child: child,
     );
   }
 
@@ -218,11 +221,11 @@ class _SettingsScreenState extends State<SettingsScreen> {
                 Text(
                   title,
                   textDirection: TextDirection.rtl,
-                  style: const TextStyle(
+                  style: TextStyle(
                     fontFamily: 'Amiri',
                     fontSize: 16,
                     fontWeight: FontWeight.bold,
-                    color: AppColors.textPrimary,
+                    color: AppColors.textP(context),
                   ),
                 ),
                 if (subtitle != null)
@@ -235,7 +238,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                         fontFamily: 'Amiri',
                         fontSize: 13,
                         color:
-                            value ? AppColors.gold : AppColors.textSecondary,
+                            value ? AppColors.gold : AppColors.textS(context),
                         decoration:
                             value ? TextDecoration.underline : null,
                       ),
@@ -257,18 +260,19 @@ class _SettingsScreenState extends State<SettingsScreen> {
   @override
   Widget build(BuildContext context) {
     final provider = context.watch<AdhkarProvider>();
+    final settings = context.watch<SettingsProvider>();
 
     return Directionality(
       textDirection: TextDirection.rtl,
       child: Scaffold(
-        backgroundColor: AppColors.beigeLight,
+        backgroundColor: AppColors.scaffold(context),
         body: SafeArea(
           child: ListView(
             padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
             children: [
               // ── Title ──
-              const Padding(
-                padding: EdgeInsets.only(bottom: 8),
+              Padding(
+                padding: const EdgeInsets.only(bottom: 8),
                 child: Text(
                   'الإعدادات',
                   textDirection: TextDirection.rtl,
@@ -276,8 +280,141 @@ class _SettingsScreenState extends State<SettingsScreen> {
                     fontFamily: 'Amiri',
                     fontSize: 24,
                     fontWeight: FontWeight.bold,
-                    color: AppColors.textPrimary,
+                    color: AppColors.textP(context),
                   ),
+                ),
+              ),
+
+              // ── Section: المظهر (Appearance) ──
+              _buildSectionHeader('المظهر'),
+              _buildSectionContainer(
+                child: Column(
+                  children: [
+                    // Dark mode toggle
+                    _buildToggleRow(
+                      icon: settings.isDarkMode
+                          ? Icons.dark_mode_rounded
+                          : Icons.light_mode_rounded,
+                      title: 'الوضع الداكن',
+                      subtitle: settings.isDarkMode ? 'مفعّل' : 'غير مفعّل',
+                      value: settings.isDarkMode,
+                      onChanged: (value) => settings.setDarkMode(value),
+                    ),
+                    Divider(
+                      color: AppColors.dividerC(context),
+                      height: 1,
+                      indent: 60,
+                    ),
+                    // Font size selector
+                    Padding(
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 8, vertical: 8),
+                      child: Row(
+                        textDirection: TextDirection.rtl,
+                        children: [
+                          Container(
+                            width: 44,
+                            height: 44,
+                            decoration: BoxDecoration(
+                              color:
+                                  AppColors.gold.withValues(alpha: 0.15),
+                              shape: BoxShape.circle,
+                            ),
+                            child: const Icon(
+                              Icons.format_size_rounded,
+                              color: AppColors.gold,
+                              size: 22,
+                            ),
+                          ),
+                          const SizedBox(width: 12),
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  'حجم الخط',
+                                  textDirection: TextDirection.rtl,
+                                  style: TextStyle(
+                                    fontFamily: 'Amiri',
+                                    fontSize: 16,
+                                    fontWeight: FontWeight.bold,
+                                    color: AppColors.textP(context),
+                                  ),
+                                ),
+                                const SizedBox(height: 8),
+                                Row(
+                                  textDirection: TextDirection.rtl,
+                                  children: List.generate(
+                                    SettingsProvider.fontScales.length,
+                                    (index) {
+                                      final isSelected =
+                                          settings.fontSizeIndex == index;
+                                      return Expanded(
+                                        child: Padding(
+                                          padding: EdgeInsets.only(
+                                            left: index <
+                                                    SettingsProvider
+                                                            .fontScales
+                                                            .length -
+                                                        1
+                                                ? 6
+                                                : 0,
+                                          ),
+                                          child: GestureDetector(
+                                            onTap: () =>
+                                                settings.setFontSizeScale(
+                                              SettingsProvider
+                                                  .fontScales[index],
+                                            ),
+                                            child: Container(
+                                              padding:
+                                                  const EdgeInsets.symmetric(
+                                                      vertical: 6),
+                                              decoration: BoxDecoration(
+                                                color: isSelected
+                                                    ? AppColors.gold
+                                                    : AppColors.gold
+                                                        .withValues(
+                                                            alpha: 0.1),
+                                                borderRadius:
+                                                    BorderRadius.circular(8),
+                                                border: Border.all(
+                                                  color: isSelected
+                                                      ? AppColors.gold
+                                                      : AppColors.gold
+                                                          .withValues(
+                                                              alpha: 0.3),
+                                                ),
+                                              ),
+                                              child: Center(
+                                                child: Text(
+                                                  SettingsProvider
+                                                      .fontScaleLabels[index],
+                                                  style: TextStyle(
+                                                    fontFamily: 'Amiri',
+                                                    fontSize: 12,
+                                                    fontWeight:
+                                                        FontWeight.w700,
+                                                    color: isSelected
+                                                        ? AppColors.white
+                                                        : AppColors.gold,
+                                                  ),
+                                                ),
+                                              ),
+                                            ),
+                                          ),
+                                        ),
+                                      );
+                                    },
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
                 ),
               ),
 
@@ -306,8 +443,8 @@ class _SettingsScreenState extends State<SettingsScreen> {
                       },
                       onSubtitleTap: _pickMorningTime,
                     ),
-                    const Divider(
-                      color: AppColors.divider,
+                    Divider(
+                      color: AppColors.dividerC(context),
                       height: 1,
                       indent: 60,
                     ),
@@ -375,13 +512,13 @@ class _SettingsScreenState extends State<SettingsScreen> {
                       color: Colors.red,
                     ),
                   ),
-                  subtitle: const Text(
+                  subtitle: Text(
                     'إعادة جميع العدادات والتسبيح إلى الصفر',
                     textDirection: TextDirection.rtl,
                     style: TextStyle(
                       fontFamily: 'Amiri',
                       fontSize: 13,
-                      color: AppColors.textSecondary,
+                      color: AppColors.textS(context),
                     ),
                   ),
                   onTap: () => _showResetConfirmation(context),
@@ -396,34 +533,34 @@ class _SettingsScreenState extends State<SettingsScreen> {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      const Text(
+                      Text(
                         'أذكاري',
                         textDirection: TextDirection.rtl,
                         style: TextStyle(
                           fontFamily: 'Amiri',
                           fontSize: 18,
                           fontWeight: FontWeight.bold,
-                          color: AppColors.textPrimary,
+                          color: AppColors.textP(context),
                         ),
                       ),
                       const SizedBox(height: 4),
-                      const Text(
+                      Text(
                         'الإصدار ١.٠.٠',
                         textDirection: TextDirection.rtl,
                         style: TextStyle(
                           fontFamily: 'Amiri',
                           fontSize: 14,
-                          color: AppColors.textSecondary,
+                          color: AppColors.textS(context),
                         ),
                       ),
                       const SizedBox(height: 8),
-                      const Text(
+                      Text(
                         'تطبيق لقراءة الأذكار والأدعية اليومية مع عدادات رقمية وتنبيهات للمحافظة على الورد اليومي.',
                         textDirection: TextDirection.rtl,
                         style: TextStyle(
                           fontFamily: 'Amiri',
                           fontSize: 15,
-                          color: AppColors.textSecondary,
+                          color: AppColors.textS(context),
                           height: 1.7,
                         ),
                       ),

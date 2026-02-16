@@ -54,7 +54,7 @@ class HomeScreen extends StatelessWidget {
     return Directionality(
       textDirection: TextDirection.rtl,
       child: Scaffold(
-        backgroundColor: AppColors.beigeLight,
+        backgroundColor: AppColors.scaffold(context),
         body: Consumer<AdhkarProvider>(
           builder: (context, provider, _) {
             final progress = provider.overallProgress;
@@ -83,14 +83,15 @@ class HomeScreen extends StatelessWidget {
                           vertical: 14,
                         ),
                         decoration: BoxDecoration(
-                          color: AppColors.white,
+                          color: AppColors.card(context),
                           borderRadius: BorderRadius.circular(14),
                           border: Border.all(
-                            color: AppColors.divider.withValues(alpha: 0.5),
+                            color: AppColors.dividerC(context).withValues(alpha: 0.5),
                           ),
                           boxShadow: [
                             BoxShadow(
-                              color: AppColors.brown.withValues(alpha: 0.06),
+                              color: (AppColors.isDark(context) ? Colors.black : AppColors.brown)
+                                  .withValues(alpha: 0.06),
                               blurRadius: 10,
                               offset: const Offset(0, 4),
                             ),
@@ -108,11 +109,11 @@ class HomeScreen extends StatelessWidget {
                                     _formatHijriDate(),
                                     textDirection: TextDirection.rtl,
                                     textAlign: TextAlign.right,
-                                    style: const TextStyle(
+                                    style: TextStyle(
                                       fontFamily: 'Amiri',
                                       fontSize: 16,
                                       fontWeight: FontWeight.w700,
-                                      color: AppColors.textPrimary,
+                                      color: AppColors.textP(context),
                                       height: 1.4,
                                     ),
                                   ),
@@ -124,7 +125,7 @@ class HomeScreen extends StatelessWidget {
                                     style: TextStyle(
                                       fontFamily: 'Amiri',
                                       fontSize: 13,
-                                      color: AppColors.textSecondary
+                                      color: AppColors.textS(context)
                                           .withValues(alpha: 0.8),
                                       height: 1.4,
                                     ),
@@ -162,7 +163,7 @@ class HomeScreen extends StatelessWidget {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         // Section title
-                        const Text(
+                        Text(
                           'تقدمك اليومي',
                           textDirection: TextDirection.rtl,
                           textAlign: TextAlign.right,
@@ -170,7 +171,7 @@ class HomeScreen extends StatelessWidget {
                             fontFamily: 'Amiri',
                             fontSize: 18,
                             fontWeight: FontWeight.w700,
-                            color: AppColors.textPrimary,
+                            color: AppColors.textP(context),
                           ),
                         ),
                         const SizedBox(height: 12),
@@ -250,7 +251,7 @@ class HomeScreen extends StatelessWidget {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        const Text(
+                        Text(
                           'الوصول السريع',
                           textDirection: TextDirection.rtl,
                           textAlign: TextAlign.right,
@@ -258,7 +259,7 @@ class HomeScreen extends StatelessWidget {
                             fontFamily: 'Amiri',
                             fontSize: 18,
                             fontWeight: FontWeight.w700,
-                            color: AppColors.textPrimary,
+                            color: AppColors.textP(context),
                           ),
                         ),
                         const SizedBox(height: 12),
@@ -315,7 +316,7 @@ class HomeScreen extends StatelessWidget {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        const Text(
+                        Text(
                           'الأذكار',
                           textDirection: TextDirection.rtl,
                           textAlign: TextAlign.right,
@@ -323,7 +324,7 @@ class HomeScreen extends StatelessWidget {
                             fontFamily: 'Amiri',
                             fontSize: 18,
                             fontWeight: FontWeight.w700,
-                            color: AppColors.textPrimary,
+                            color: AppColors.textP(context),
                           ),
                         ),
                         const SizedBox(height: 12),
@@ -423,11 +424,11 @@ class _QuickAccessButton extends StatelessWidget {
             label,
             textDirection: TextDirection.rtl,
             textAlign: TextAlign.center,
-            style: const TextStyle(
+            style: TextStyle(
               fontFamily: 'Amiri',
               fontSize: 13,
               fontWeight: FontWeight.w700,
-              color: AppColors.textPrimary,
+              color: AppColors.textP(context),
             ),
           ),
         ],
@@ -463,16 +464,17 @@ class _CategoryCard extends StatelessWidget {
       onTap: onTap,
       child: Container(
         decoration: BoxDecoration(
-          color: AppColors.cardBackground,
+          color: AppColors.card(context),
           borderRadius: BorderRadius.circular(18),
           border: Border.all(
             color: isCompleted
                 ? AppColors.counterCompleted.withValues(alpha: 0.3)
-                : AppColors.divider.withValues(alpha: 0.5),
+                : AppColors.dividerC(context).withValues(alpha: 0.5),
           ),
           boxShadow: [
             BoxShadow(
-              color: AppColors.brown.withValues(alpha: 0.04),
+              color: (AppColors.isDark(context) ? Colors.black : AppColors.brown)
+                  .withValues(alpha: 0.04),
               blurRadius: 10,
               offset: const Offset(0, 3),
             ),
@@ -515,11 +517,11 @@ class _CategoryCard extends StatelessWidget {
                 textAlign: TextAlign.center,
                 maxLines: 2,
                 overflow: TextOverflow.ellipsis,
-                style: const TextStyle(
+                style: TextStyle(
                   fontFamily: 'Amiri',
                   fontSize: 14,
                   fontWeight: FontWeight.w700,
-                  color: AppColors.textPrimary,
+                  color: AppColors.textP(context),
                   height: 1.3,
                 ),
               ),
@@ -529,10 +531,10 @@ class _CategoryCard extends StatelessWidget {
                 '$count أذكار',
                 textDirection: TextDirection.rtl,
                 textAlign: TextAlign.center,
-                style: const TextStyle(
+                style: TextStyle(
                   fontFamily: 'Amiri',
                   fontSize: 12,
-                  color: AppColors.textSecondary,
+                  color: AppColors.textS(context),
                 ),
               ),
               const SizedBox(height: 8),
@@ -544,7 +546,7 @@ class _CategoryCard extends StatelessWidget {
                   child: LinearProgressIndicator(
                     value: progress,
                     minHeight: 4,
-                    backgroundColor: AppColors.beigeDark,
+                    backgroundColor: AppColors.progressBg(context),
                     valueColor: AlwaysStoppedAnimation<Color>(
                       isCompleted
                           ? AppColors.counterCompleted

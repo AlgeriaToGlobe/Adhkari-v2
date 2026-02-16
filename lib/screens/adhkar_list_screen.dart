@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../providers/adhkar_provider.dart';
 import '../theme/app_colors.dart';
+import '../widgets/accessibility_bar.dart';
 import '../widgets/dhikr_card.dart';
 import '../widgets/diamond_divider.dart';
 import 'hadith_detail_screen.dart';
@@ -16,19 +17,22 @@ class AdhkarListScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final dark = AppColors.isDark(context);
+
     return Directionality(
       textDirection: TextDirection.rtl,
       child: Consumer<AdhkarProvider>(
         builder: (context, provider, _) {
           final category = provider.getCategoryById(categoryId);
           if (category == null) {
-            return const Scaffold(
-              body: Center(child: CircularProgressIndicator()),
+            return Scaffold(
+              backgroundColor: AppColors.scaffold(context),
+              body: const Center(child: CircularProgressIndicator()),
             );
           }
 
           return Scaffold(
-            backgroundColor: AppColors.beigeLight,
+            backgroundColor: AppColors.scaffold(context),
             body: CustomScrollView(
               slivers: [
                 // ── Styled app bar ──
@@ -36,8 +40,10 @@ class AdhkarListScreen extends StatelessWidget {
                   expandedHeight: 120,
                   floating: false,
                   pinned: true,
-                  backgroundColor: AppColors.brown,
-                  foregroundColor: AppColors.white,
+                  backgroundColor:
+                      dark ? AppColors.darkSurface : AppColors.brown,
+                  foregroundColor:
+                      dark ? AppColors.darkTextPrimary : AppColors.white,
                   centerTitle: true,
                   actions: [
                     IconButton(
@@ -49,27 +55,37 @@ class AdhkarListScreen extends StatelessWidget {
                           builder: (ctx) => Directionality(
                             textDirection: TextDirection.rtl,
                             child: AlertDialog(
+                              backgroundColor: AppColors.card(context),
                               shape: RoundedRectangleBorder(
                                 borderRadius: BorderRadius.circular(16),
                               ),
-                              title: const Text(
+                              title: Text(
                                 'إعادة العدادات',
                                 textAlign: TextAlign.right,
                                 textDirection: TextDirection.rtl,
-                                style: TextStyle(fontFamily: 'Amiri'),
+                                style: TextStyle(
+                                  fontFamily: 'Amiri',
+                                  color: AppColors.textP(context),
+                                ),
                               ),
-                              content: const Text(
+                              content: Text(
                                 'هل تريد إعادة جميع العدادات في هذا القسم؟',
                                 textAlign: TextAlign.right,
                                 textDirection: TextDirection.rtl,
-                                style: TextStyle(fontFamily: 'Amiri'),
+                                style: TextStyle(
+                                  fontFamily: 'Amiri',
+                                  color: AppColors.textS(context),
+                                ),
                               ),
                               actions: [
                                 TextButton(
                                   onPressed: () => Navigator.pop(ctx),
-                                  child: const Text(
+                                  child: Text(
                                     'إلغاء',
-                                    style: TextStyle(fontFamily: 'Amiri'),
+                                    style: TextStyle(
+                                      fontFamily: 'Amiri',
+                                      color: AppColors.textS(context),
+                                    ),
                                   ),
                                 ),
                                 TextButton(
@@ -96,16 +112,27 @@ class AdhkarListScreen extends StatelessWidget {
                     centerTitle: true,
                     title: Text(
                       category.title,
-                      style: const TextStyle(
+                      style: TextStyle(
                         fontFamily: 'Amiri',
                         fontSize: 20,
                         fontWeight: FontWeight.w700,
-                        color: AppColors.white,
+                        color: dark
+                            ? AppColors.darkTextPrimary
+                            : AppColors.white,
                       ),
                     ),
                     background: Container(
-                      decoration: const BoxDecoration(
-                        gradient: AppColors.headerGradient,
+                      decoration: BoxDecoration(
+                        gradient: dark
+                            ? const LinearGradient(
+                                begin: Alignment.topCenter,
+                                end: Alignment.bottomCenter,
+                                colors: [
+                                  AppColors.darkCard,
+                                  AppColors.darkSurface,
+                                ],
+                              )
+                            : AppColors.headerGradient,
                       ),
                       child: Align(
                         alignment: Alignment.bottomCenter,
@@ -117,8 +144,9 @@ class AdhkarListScreen extends StatelessWidget {
                             style: TextStyle(
                               fontFamily: 'Amiri',
                               fontSize: 13,
-                              color:
-                                  AppColors.white.withValues(alpha: 0.6),
+                              color: dark
+                                  ? AppColors.darkTextSecondary
+                                  : AppColors.white.withValues(alpha: 0.6),
                             ),
                           ),
                         ),
@@ -135,10 +163,11 @@ class AdhkarListScreen extends StatelessWidget {
                       vertical: 14,
                     ),
                     decoration: BoxDecoration(
-                      color: AppColors.beigeWarm,
+                      color: AppColors.surface(context),
                       boxShadow: [
                         BoxShadow(
-                          color: AppColors.brown.withValues(alpha: 0.06),
+                          color: (dark ? Colors.black : AppColors.brown)
+                              .withValues(alpha: 0.06),
                           blurRadius: 4,
                           offset: const Offset(0, 2),
                         ),
@@ -150,11 +179,11 @@ class AdhkarListScreen extends StatelessWidget {
                         Text(
                           '${category.completedCount} من ${category.totalCount}',
                           textDirection: TextDirection.rtl,
-                          style: const TextStyle(
+                          style: TextStyle(
                             fontFamily: 'Amiri',
                             fontSize: 14,
                             fontWeight: FontWeight.w700,
-                            color: AppColors.brownLight,
+                            color: AppColors.brownLightC(context),
                           ),
                         ),
                         const SizedBox(width: 12),
@@ -164,7 +193,7 @@ class AdhkarListScreen extends StatelessWidget {
                             child: LinearProgressIndicator(
                               value: category.progress,
                               minHeight: 6,
-                              backgroundColor: AppColors.beigeDark,
+                              backgroundColor: AppColors.progressBg(context),
                               valueColor: AlwaysStoppedAnimation<Color>(
                                 category.isAllCompleted
                                     ? AppColors.counterCompleted
@@ -189,6 +218,11 @@ class AdhkarListScreen extends StatelessWidget {
                       ],
                     ),
                   ),
+                ),
+
+                // ── Accessibility bar (font size + dark mode) ──
+                const SliverToBoxAdapter(
+                  child: AccessibilityBar(),
                 ),
 
                 // ── Adhkar list with diamond dividers ──
