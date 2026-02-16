@@ -16,10 +16,12 @@ class ArchHeader extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final dark = AppColors.isDark(context);
+
     return Container(
       width: double.infinity,
-      decoration: const BoxDecoration(
-        gradient: AppColors.headerGradient,
+      decoration: BoxDecoration(
+        gradient: dark ? AppColors.darkHeaderGradient : AppColors.headerGradient,
       ),
       child: SafeArea(
         bottom: false,

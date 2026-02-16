@@ -62,8 +62,10 @@ class _SplashScreenState extends State<SplashScreen>
 
   @override
   Widget build(BuildContext context) {
+    final dark = AppColors.isDark(context);
+
     return Scaffold(
-      backgroundColor: AppColors.beigeLight,
+      backgroundColor: AppColors.scaffold(context),
       body: Center(
         child: AnimatedBuilder(
           animation: _controller,
@@ -99,16 +101,17 @@ class _SplashScreenState extends State<SplashScreen>
                             height: 72,
                             decoration: BoxDecoration(
                               shape: BoxShape.circle,
-                              color: AppColors.brown.withValues(alpha: 0.08),
+                              color: (dark ? AppColors.darkGold : AppColors.brown)
+                                  .withValues(alpha: 0.08),
                               border: Border.all(
-                                color: AppColors.gold.withValues(alpha: 0.3),
+                                color: AppColors.goldC(context).withValues(alpha: 0.3),
                                 width: 2,
                               ),
                             ),
-                            child: const Icon(
+                            child: Icon(
                               Icons.mosque_outlined,
                               size: 36,
-                              color: AppColors.gold,
+                              color: AppColors.goldC(context),
                             ),
                           ),
                         ],
@@ -119,13 +122,13 @@ class _SplashScreenState extends State<SplashScreen>
               ),
               const SizedBox(height: 24),
               // App name
-              const Text(
+              Text(
                 'أذكاري',
                 style: TextStyle(
                   fontFamily: 'Amiri',
                   fontSize: 42,
                   fontWeight: FontWeight.w700,
-                  color: AppColors.brown,
+                  color: AppColors.brownC(context),
                   height: 1.2,
                 ),
               ),
@@ -135,7 +138,7 @@ class _SplashScreenState extends State<SplashScreen>
                 style: TextStyle(
                   fontFamily: 'Amiri',
                   fontSize: 16,
-                  color: AppColors.brownLight.withValues(alpha: 0.7),
+                  color: AppColors.brownLightC(context).withValues(alpha: 0.7),
                 ),
               ),
             ],

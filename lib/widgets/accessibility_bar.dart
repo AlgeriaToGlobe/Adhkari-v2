@@ -114,7 +114,8 @@ class _IconBtn extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final color = enabled ? AppColors.gold : AppColors.dividerC(context);
+    final accentGold = AppColors.goldC(context);
+    final color = enabled ? accentGold : AppColors.dividerC(context);
 
     return GestureDetector(
       onTap: onTap,
@@ -127,7 +128,7 @@ class _IconBtn extends StatelessWidget {
           borderRadius: BorderRadius.circular(10),
           border: Border.all(
             color: enabled
-                ? AppColors.gold.withValues(alpha: 0.4)
+                ? accentGold.withValues(alpha: 0.4)
                 : (dark ? AppColors.darkDivider : AppColors.divider),
           ),
         ),

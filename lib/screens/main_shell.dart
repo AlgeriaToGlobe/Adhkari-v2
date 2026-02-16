@@ -52,7 +52,7 @@ class _MainShellState extends State<MainShell> {
             onTap: (index) => setState(() => _currentIndex = index),
             type: BottomNavigationBarType.fixed,
             backgroundColor: AppColors.card(context),
-            selectedItemColor: dark ? AppColors.gold : AppColors.brown,
+            selectedItemColor: dark ? AppColors.darkGold : AppColors.brown,
             unselectedItemColor: AppColors.brownLightC(context),
             selectedFontSize: 12,
             unselectedFontSize: 11,

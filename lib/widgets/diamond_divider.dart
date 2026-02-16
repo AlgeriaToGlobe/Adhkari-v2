@@ -12,7 +12,7 @@ class DiamondDivider extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final c = color ?? AppColors.gold.withValues(alpha: 0.5);
+    final c = color ?? AppColors.goldC(context).withValues(alpha: 0.5);
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 16),
       child: Row(

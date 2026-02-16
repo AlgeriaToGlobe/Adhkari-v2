@@ -12,14 +12,16 @@ class HadithDetailScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final dark = AppColors.isDark(context);
+
     return Directionality(
       textDirection: TextDirection.rtl,
       child: Scaffold(
-        backgroundColor: AppColors.beigeLight,
+        backgroundColor: AppColors.scaffold(context),
         appBar: AppBar(
           title: const Text('تخريج الحديث'),
-          backgroundColor: AppColors.brown,
-          foregroundColor: AppColors.white,
+          backgroundColor: dark ? AppColors.darkSurface : AppColors.brown,
+          foregroundColor: dark ? AppColors.darkTextPrimary : AppColors.white,
           centerTitle: true,
         ),
         body: SingleChildScrollView(
@@ -31,12 +33,13 @@ class HadithDetailScreen extends StatelessWidget {
               Container(
                 padding: const EdgeInsets.all(20),
                 decoration: BoxDecoration(
-                  color: AppColors.cardBackground,
+                  color: AppColors.card(context),
                   borderRadius: BorderRadius.circular(16),
-                  border: Border.all(color: AppColors.divider),
+                  border: Border.all(color: AppColors.dividerC(context)),
                   boxShadow: [
                     BoxShadow(
-                      color: AppColors.brown.withValues(alpha: 0.05),
+                      color: (dark ? Colors.black : AppColors.brown)
+                          .withValues(alpha: dark ? 0.15 : 0.05),
                       blurRadius: 8,
                       offset: const Offset(0, 2),
                     ),
@@ -46,11 +49,11 @@ class HadithDetailScreen extends StatelessWidget {
                   dhikr.text,
                   textAlign: TextAlign.right,
                   textDirection: TextDirection.rtl,
-                  style: const TextStyle(
+                  style: TextStyle(
                     fontFamily: 'Amiri',
                     fontSize: 22,
                     fontWeight: FontWeight.w400,
-                    color: AppColors.textPrimary,
+                    color: AppColors.textP(context),
                     height: 2.0,
                   ),
                 ),
@@ -157,13 +160,15 @@ class _InfoSection extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final accentGold = AppColors.goldC(context);
+
     return Container(
       margin: const EdgeInsets.only(bottom: 12),
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: AppColors.cardBackground,
+        color: AppColors.card(context),
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: AppColors.divider),
+        border: Border.all(color: AppColors.dividerC(context)),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -171,16 +176,16 @@ class _InfoSection extends StatelessWidget {
           Row(
             textDirection: TextDirection.rtl,
             children: [
-              Icon(icon, size: 20, color: AppColors.gold),
+              Icon(icon, size: 20, color: accentGold),
               const SizedBox(width: 8),
               Text(
                 title,
                 textDirection: TextDirection.rtl,
-                style: const TextStyle(
+                style: TextStyle(
                   fontFamily: 'Amiri',
                   fontSize: 16,
                   fontWeight: FontWeight.w700,
-                  color: AppColors.gold,
+                  color: accentGold,
                 ),
               ),
               if (trailing != null) ...[
@@ -194,10 +199,10 @@ class _InfoSection extends StatelessWidget {
             content,
             textAlign: TextAlign.right,
             textDirection: TextDirection.rtl,
-            style: const TextStyle(
+            style: TextStyle(
               fontFamily: 'Amiri',
               fontSize: 16,
-              color: AppColors.textPrimary,
+              color: AppColors.textP(context),
               height: 1.7,
             ),
           ),

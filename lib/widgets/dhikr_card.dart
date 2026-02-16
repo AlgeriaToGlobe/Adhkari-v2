@@ -124,7 +124,7 @@ class _DhikrCardState extends State<DhikrCard>
                   padding:
                       const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
                   decoration: BoxDecoration(
-                    color: AppColors.gold.withValues(alpha: dark ? 0.1 : 0.06),
+                    color: AppColors.goldC(context).withValues(alpha: dark ? 0.1 : 0.06),
                     borderRadius: BorderRadius.circular(10),
                   ),
                   child: Text(
@@ -172,7 +172,7 @@ class _DhikrCardState extends State<DhikrCard>
                       child: Icon(
                         Icons.info_outline_rounded,
                         size: 16,
-                        color: AppColors.gold.withValues(alpha: 0.5),
+                        color: AppColors.goldC(context).withValues(alpha: 0.5),
                       ),
                     ),
                   ],
@@ -200,6 +200,8 @@ class _CounterPill extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final accentGold = AppColors.goldC(context);
+
     if (isCompleted) {
       return Container(
         padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 6),
@@ -240,10 +242,10 @@ class _CounterPill extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 6),
       decoration: BoxDecoration(
-        color: AppColors.gold.withValues(alpha: 0.08),
+        color: accentGold.withValues(alpha: 0.08),
         borderRadius: BorderRadius.circular(20),
         border: Border.all(
-          color: AppColors.gold.withValues(alpha: 0.25),
+          color: accentGold.withValues(alpha: 0.25),
         ),
       ),
       child: Row(
@@ -256,8 +258,8 @@ class _CounterPill extends StatelessWidget {
             child: CircularProgressIndicator(
               value: progress,
               strokeWidth: 2.5,
-              backgroundColor: AppColors.gold.withValues(alpha: 0.15),
-              valueColor: const AlwaysStoppedAnimation<Color>(AppColors.gold),
+              backgroundColor: accentGold.withValues(alpha: 0.15),
+              valueColor: AlwaysStoppedAnimation<Color>(accentGold),
               strokeCap: StrokeCap.round,
             ),
           ),
@@ -267,11 +269,11 @@ class _CounterPill extends StatelessWidget {
                 ? '(${currentCount}x)'
                 : '($currentCount/${targetCount}x)',
             textDirection: TextDirection.ltr,
-            style: const TextStyle(
+            style: TextStyle(
               fontFamily: 'Amiri',
               fontSize: 16,
               fontWeight: FontWeight.w700,
-              color: AppColors.gold,
+              color: accentGold,
             ),
           ),
         ],

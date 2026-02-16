@@ -15,15 +15,20 @@ class DailyProgressWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final dark = AppColors.isDark(context);
+
     return Container(
       margin: const EdgeInsets.symmetric(horizontal: 20),
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
-        gradient: AppColors.headerGradientSubtle,
+        gradient: dark
+            ? AppColors.darkHeaderGradientSubtle
+            : AppColors.headerGradientSubtle,
         borderRadius: BorderRadius.circular(20),
         boxShadow: [
           BoxShadow(
-            color: AppColors.brownDark.withValues(alpha: 0.25),
+            color: (dark ? Colors.black : AppColors.brownDark)
+                .withValues(alpha: dark ? 0.3 : 0.25),
             blurRadius: 16,
             offset: const Offset(0, 6),
           ),
