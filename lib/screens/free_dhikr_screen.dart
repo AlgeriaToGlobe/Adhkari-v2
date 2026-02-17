@@ -314,34 +314,51 @@ class FreeDhikrScreen extends StatelessWidget {
   }
 
   Widget _buildEmptyState(BuildContext context) {
+    final accentGold = AppColors.goldC(context);
     return Center(
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Icon(
-            Icons.edit_note,
-            size: 64,
-            color: AppColors.goldC(context).withValues(alpha: 0.3),
-          ),
-          const SizedBox(height: 16),
-          Text(
-            'لا توجد أذكار مضافة',
-            style: TextStyle(
-              fontFamily: 'Amiri',
-              fontSize: 18,
-              color: AppColors.textS(context),
+      child: Padding(
+        padding: const EdgeInsets.only(bottom: 40),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Container(
+              width: 120,
+              height: 120,
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                color: accentGold.withValues(alpha: 0.06),
+                border: Border.all(
+                  color: accentGold.withValues(alpha: 0.15),
+                  width: 1.5,
+                ),
+              ),
+              child: Icon(
+                Icons.edit_note_rounded,
+                size: 48,
+                color: accentGold.withValues(alpha: 0.4),
+              ),
             ),
-          ),
-          const SizedBox(height: 8),
-          Text(
-            'اضغط الزر أعلاه لإضافة ذكر جديد',
-            style: TextStyle(
-              fontFamily: 'Amiri',
-              fontSize: 14,
-              color: AppColors.textS(context),
+            const SizedBox(height: 20),
+            Text(
+              'لا توجد أذكار مضافة',
+              style: TextStyle(
+                fontFamily: 'Amiri',
+                fontSize: 20,
+                fontWeight: FontWeight.w700,
+                color: AppColors.textS(context),
+              ),
             ),
-          ),
-        ],
+            const SizedBox(height: 8),
+            Text(
+              'اضغط الزر أعلاه لإضافة ذكر جديد',
+              style: TextStyle(
+                fontFamily: 'Amiri',
+                fontSize: 14,
+                color: AppColors.textS(context).withValues(alpha: 0.6),
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }

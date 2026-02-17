@@ -83,6 +83,66 @@ class AppColors {
   static Color brownLightC(BuildContext context) =>
       isDark(context) ? darkTextSecondary : brownLight;
 
+  // ── Design system constants ──
+  static const double radiusS = 12;
+  static const double radiusM = 16;
+  static const double radiusL = 20;
+
+  // ── Shadow helpers ──
+  static List<BoxShadow> cardShadow(BuildContext context) => [
+        BoxShadow(
+          color: (isDark(context) ? Colors.black : brown)
+              .withValues(alpha: isDark(context) ? 0.15 : 0.04),
+          blurRadius: 8,
+          offset: const Offset(0, 2),
+        ),
+      ];
+
+  static List<BoxShadow> elevatedShadow(BuildContext context) => [
+        BoxShadow(
+          color: (isDark(context) ? Colors.black : brown)
+              .withValues(alpha: isDark(context) ? 0.25 : 0.08),
+          blurRadius: 16,
+          offset: const Offset(0, 6),
+        ),
+      ];
+
+  // ── Styled SnackBar helper ──
+  static void showStyledSnackBar(BuildContext context, String message,
+      {IconData? icon}) {
+    final dark = isDark(context);
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Row(
+          textDirection: TextDirection.rtl,
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            if (icon != null) ...[
+              Icon(icon, size: 18, color: dark ? darkGold : gold),
+              const SizedBox(width: 8),
+            ],
+            Text(
+              message,
+              textDirection: TextDirection.rtl,
+              textAlign: TextAlign.center,
+              style: TextStyle(
+                fontFamily: 'Amiri',
+                fontSize: 14,
+                color: dark ? darkTextPrimary : white,
+              ),
+            ),
+          ],
+        ),
+        backgroundColor: dark ? darkCard : brown,
+        behavior: SnackBarBehavior.floating,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(radiusS)),
+        margin: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+        elevation: dark ? 8 : 4,
+        duration: const Duration(seconds: 2),
+      ),
+    );
+  }
+
   // ── Gradient presets ──
   static const LinearGradient headerGradient = LinearGradient(
     begin: Alignment.topCenter,

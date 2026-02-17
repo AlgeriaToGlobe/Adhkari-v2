@@ -52,6 +52,31 @@ class _SettingsScreenState extends State<SettingsScreen> {
     return '$hour:$minute $period';
   }
 
+  TimePickerThemeData _buildTimePickerTheme(BuildContext context) {
+    final accentGold = AppColors.goldC(context);
+    return TimePickerThemeData(
+      backgroundColor: AppColors.card(context),
+      hourMinuteColor: accentGold.withValues(alpha: 0.1),
+      hourMinuteTextColor: AppColors.textP(context),
+      dialHandColor: accentGold,
+      dialBackgroundColor: AppColors.surface(context),
+      dialTextColor: AppColors.textP(context),
+      dayPeriodColor: accentGold.withValues(alpha: 0.1),
+      dayPeriodTextColor: AppColors.textP(context),
+      entryModeIconColor: accentGold,
+      helpTextStyle: TextStyle(
+        fontFamily: 'Amiri',
+        fontSize: 14,
+        color: AppColors.textS(context),
+      ),
+      hourMinuteTextStyle: const TextStyle(
+        fontFamily: 'Amiri',
+        fontSize: 40,
+        fontWeight: FontWeight.w700,
+      ),
+    );
+  }
+
   Future<void> _pickMorningTime() async {
     final picked = await showTimePicker(
       context: context,
@@ -59,7 +84,18 @@ class _SettingsScreenState extends State<SettingsScreen> {
       builder: (context, child) {
         return Directionality(
           textDirection: TextDirection.rtl,
-          child: child!,
+          child: Theme(
+            data: Theme.of(context).copyWith(
+              timePickerTheme: _buildTimePickerTheme(context),
+              textButtonTheme: TextButtonThemeData(
+                style: TextButton.styleFrom(
+                  foregroundColor: AppColors.goldC(context),
+                  textStyle: const TextStyle(fontFamily: 'Amiri', fontSize: 15),
+                ),
+              ),
+            ),
+            child: child!,
+          ),
         );
       },
     );
@@ -81,7 +117,18 @@ class _SettingsScreenState extends State<SettingsScreen> {
       builder: (context, child) {
         return Directionality(
           textDirection: TextDirection.rtl,
-          child: child!,
+          child: Theme(
+            data: Theme.of(context).copyWith(
+              timePickerTheme: _buildTimePickerTheme(context),
+              textButtonTheme: TextButtonThemeData(
+                style: TextButton.styleFrom(
+                  foregroundColor: AppColors.goldC(context),
+                  textStyle: const TextStyle(fontFamily: 'Amiri', fontSize: 15),
+                ),
+              ),
+            ),
+            child: child!,
+          ),
         );
       },
     );

@@ -578,33 +578,65 @@ class _TasbeehRingPainter extends CustomPainter {
       ..strokeWidth = 2.0;
     canvas.drawCircle(center, radius - 4, ringPaint);
 
-    // Tick marks
+    // Progress indicator
     if (target > 0) {
-      final tickCount = target;
-      final tickRadius = radius - 4;
-      final innerTickRadius = tickRadius - 10;
-
-      for (int i = 0; i < tickCount; i++) {
-        final angle = (2 * pi * i / tickCount) - (pi / 2);
-        final outerX = center.dx + tickRadius * cos(angle);
-        final outerY = center.dy + tickRadius * sin(angle);
-        final innerX = center.dx + innerTickRadius * cos(angle);
-        final innerY = center.dy + innerTickRadius * sin(angle);
-
-        final isFilled = i < count;
-        final tickPaint = Paint()
-          ..color = isFilled
-              ? goldColor
-              : (isDark ? AppColors.darkDivider : AppColors.beigeDark)
+      if (target > 100) {
+        // Simplified arc for large targets
+        final arcRadius = radius - 8;
+        final bgArcPaint = Paint()
+          ..color = isDark ? AppColors.darkDivider : AppColors.beigeDark
           ..style = PaintingStyle.stroke
-          ..strokeWidth = isFilled ? 2.5 : 1.5
+          ..strokeWidth = 8
           ..strokeCap = StrokeCap.round;
-
-        canvas.drawLine(
-          Offset(outerX, outerY),
-          Offset(innerX, innerY),
-          tickPaint,
+        canvas.drawArc(
+          Rect.fromCircle(center: center, radius: arcRadius),
+          -pi / 2,
+          2 * pi,
+          false,
+          bgArcPaint,
         );
+
+        final progressArcPaint = Paint()
+          ..color = goldColor
+          ..style = PaintingStyle.stroke
+          ..strokeWidth = 8
+          ..strokeCap = StrokeCap.round;
+        final sweepAngle = 2 * pi * (count / target);
+        canvas.drawArc(
+          Rect.fromCircle(center: center, radius: arcRadius),
+          -pi / 2,
+          sweepAngle,
+          false,
+          progressArcPaint,
+        );
+      } else {
+        // Tick marks for small targets
+        final tickCount = target;
+        final tickRadius = radius - 4;
+        final innerTickRadius = tickRadius - 10;
+
+        for (int i = 0; i < tickCount; i++) {
+          final angle = (2 * pi * i / tickCount) - (pi / 2);
+          final outerX = center.dx + tickRadius * cos(angle);
+          final outerY = center.dy + tickRadius * sin(angle);
+          final innerX = center.dx + innerTickRadius * cos(angle);
+          final innerY = center.dy + innerTickRadius * sin(angle);
+
+          final isFilled = i < count;
+          final tickPaint = Paint()
+            ..color = isFilled
+                ? goldColor
+                : (isDark ? AppColors.darkDivider : AppColors.beigeDark)
+            ..style = PaintingStyle.stroke
+            ..strokeWidth = isFilled ? 2.5 : 1.5
+            ..strokeCap = StrokeCap.round;
+
+          canvas.drawLine(
+            Offset(outerX, outerY),
+            Offset(innerX, innerY),
+            tickPaint,
+          );
+        }
       }
     }
   }
