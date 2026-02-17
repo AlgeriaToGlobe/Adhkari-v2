@@ -280,7 +280,7 @@ class _TaqwimScreenState extends State<TaqwimScreen> {
                     vertical: 8,
                   ),
                   child: Container(
-                    padding: const EdgeInsets.all(20),
+                    padding: const EdgeInsets.symmetric(vertical: 24),
                     decoration: BoxDecoration(
                       color: AppColors.card(context),
                       borderRadius: BorderRadius.circular(14),
@@ -288,15 +288,33 @@ class _TaqwimScreenState extends State<TaqwimScreen> {
                         color: AppColors.dividerC(context).withValues(alpha: 0.3),
                       ),
                     ),
-                    child: Text(
-                      'لا توجد مناسبات إسلامية في هذا الشهر',
-                      textDirection: TextDirection.rtl,
-                      textAlign: TextAlign.center,
-                      style: TextStyle(
-                        fontFamily: 'Amiri',
-                        fontSize: 14,
-                        color: AppColors.textS(context).withValues(alpha: 0.7),
-                      ),
+                    child: Column(
+                      children: [
+                        Container(
+                          width: 80,
+                          height: 80,
+                          decoration: BoxDecoration(
+                            shape: BoxShape.circle,
+                            color: AppColors.goldC(context).withValues(alpha: 0.05),
+                          ),
+                          child: Icon(
+                            Icons.event_busy_rounded,
+                            size: 48,
+                            color: AppColors.goldC(context).withValues(alpha: 0.3),
+                          ),
+                        ),
+                        const SizedBox(height: 12),
+                        Text(
+                          'لا توجد مناسبات إسلامية في هذا الشهر',
+                          textDirection: TextDirection.rtl,
+                          textAlign: TextAlign.center,
+                          style: TextStyle(
+                            fontFamily: 'Amiri',
+                            fontSize: 16,
+                            color: AppColors.textS(context).withValues(alpha: 0.7),
+                          ),
+                        ),
+                      ],
                     ),
                   ),
                 ),

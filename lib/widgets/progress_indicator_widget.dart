@@ -51,19 +51,19 @@ class DailyProgressWidget extends StatelessWidget {
                     value: progress,
                     strokeWidth: 6,
                     backgroundColor: AppColors.white.withValues(alpha: 0.1),
-                    valueColor: const AlwaysStoppedAnimation<Color>(
-                      AppColors.gold,
+                    valueColor: AlwaysStoppedAnimation<Color>(
+                      dark ? AppColors.darkGold : AppColors.gold,
                     ),
                     strokeCap: StrokeCap.round,
                   ),
                 ),
                 Text(
                   '${(progress * 100).toInt()}%',
-                  style: const TextStyle(
+                  style: TextStyle(
                     fontFamily: 'Amiri',
                     fontSize: 20,
                     fontWeight: FontWeight.w700,
-                    color: AppColors.gold,
+                    color: dark ? AppColors.darkGold : AppColors.gold,
                     height: 1.0,
                   ),
                 ),
@@ -105,7 +105,7 @@ class DailyProgressWidget extends StatelessWidget {
                   style: TextStyle(
                     fontFamily: 'Amiri',
                     fontSize: 13,
-                    color: AppColors.gold.withValues(alpha: 0.8),
+                    color: (dark ? AppColors.darkGold : AppColors.gold).withValues(alpha: 0.8),
                     height: 1.4,
                   ),
                 ),

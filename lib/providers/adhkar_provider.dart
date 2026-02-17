@@ -22,6 +22,12 @@ class AdhkarProvider extends ChangeNotifier {
   int get tasbeehTarget => _tasbeehTarget;
   String get tasbeehLabel => _tasbeehLabel;
 
+  int _streakCount = 0;
+  List<bool> _weekCompletion = List.filled(7, false);
+
+  int get streakCount => _streakCount;
+  List<bool> get weekCompletion => _weekCompletion;
+
   int get totalAdhkar =>
       _categories.fold(0, (sum, cat) => sum + cat.totalCount);
   int get completedAdhkar =>
@@ -40,6 +46,31 @@ class AdhkarProvider extends ChangeNotifier {
     final lastReset = prefs.getString('lastResetDate');
     final today = DateTime.now().toIso8601String().substring(0, 10);
     if (lastReset != today) {
+      // Update streak — check if yesterday had progress
+      final yesterday = prefs.getString('lastResetDate');
+      if (yesterday != null) {
+        final hadProgress = prefs.getBool('day_had_progress') ?? false;
+        if (hadProgress) {
+          _streakCount = (prefs.getInt('streak_count') ?? 0) + 1;
+        } else {
+          _streakCount = 0;
+        }
+      }
+      await prefs.setInt('streak_count', _streakCount);
+      await prefs.setBool('day_had_progress', false);
+
+      // Update week history — shift and add today
+      final todayWeekday = DateTime.now().weekday - 1; // 0=Monday
+      _weekCompletion = List.filled(7, false);
+      final historyJson = prefs.getString('week_history');
+      if (historyJson != null) {
+        final List<dynamic> old = jsonDecode(historyJson);
+        for (int i = 0; i < 7 && i < old.length; i++) {
+          _weekCompletion[i] = old[i] as bool;
+        }
+      }
+      await prefs.setString('week_history', jsonEncode(_weekCompletion));
+
       await prefs.setString('lastResetDate', today);
       for (final category in _categories) {
         for (final dhikr in category.adhkar) {
@@ -69,6 +100,15 @@ class AdhkarProvider extends ChangeNotifier {
           decoded.map((e) => FreeDhikrItem.fromJson(e)).toList();
     }
 
+    // Load streak data
+    _streakCount = prefs.getInt('streak_count') ?? 0;
+    final weekJson = prefs.getString('week_history');
+    if (weekJson != null) {
+      final List<dynamic> decoded = jsonDecode(weekJson);
+      _weekCompletion = decoded.map((e) => e as bool).toList();
+      if (_weekCompletion.length != 7) _weekCompletion = List.filled(7, false);
+    }
+
     notifyListeners();
   }
 
@@ -82,6 +122,14 @@ class AdhkarProvider extends ChangeNotifier {
       final prefs = await SharedPreferences.getInstance();
       await prefs.setInt('count_${dhikr.id}', dhikr.currentCount);
       notifyListeners();
+
+      // Mark today as having progress for streak tracking
+      final streakPrefs = await SharedPreferences.getInstance();
+      await streakPrefs.setBool('day_had_progress', true);
+      // Update today's entry in week completion
+      final todayIndex = DateTime.now().weekday - 1;
+      _weekCompletion[todayIndex] = true;
+      await streakPrefs.setString('week_history', jsonEncode(_weekCompletion));
     }
   }
 
@@ -191,6 +239,15 @@ class AdhkarProvider extends ChangeNotifier {
     final prefs = await SharedPreferences.getInstance();
     final json = jsonEncode(_freeDhikrItems.map((e) => e.toJson()).toList());
     await prefs.setString('freeDhikrItems', json);
+  }
+
+  Future<void> checkDailyReset() async {
+    final prefs = await SharedPreferences.getInstance();
+    final lastReset = prefs.getString('lastResetDate');
+    final today = DateTime.now().toIso8601String().substring(0, 10);
+    if (lastReset != today) {
+      await _loadData();
+    }
   }
 
   // ── Settings ──

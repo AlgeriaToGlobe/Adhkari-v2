@@ -1,19 +1,58 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 import '../providers/adhkar_provider.dart';
 import '../theme/app_colors.dart';
+import '../utils/page_transitions.dart';
 import '../widgets/accessibility_bar.dart';
 import '../widgets/dhikr_card.dart';
 import '../widgets/diamond_divider.dart';
 import 'hadith_detail_screen.dart';
 
-class AdhkarListScreen extends StatelessWidget {
+class AdhkarListScreen extends StatefulWidget {
   final String categoryId;
 
   const AdhkarListScreen({
     super.key,
     required this.categoryId,
   });
+
+  @override
+  State<AdhkarListScreen> createState() => _AdhkarListScreenState();
+}
+
+class _AdhkarListScreenState extends State<AdhkarListScreen> {
+  final ScrollController _scrollController = ScrollController();
+  bool _showScrollToTop = false;
+  bool _celebrationShown = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _scrollController.addListener(_onScroll);
+  }
+
+  @override
+  void dispose() {
+    _scrollController.removeListener(_onScroll);
+    _scrollController.dispose();
+    super.dispose();
+  }
+
+  void _onScroll() {
+    final show = _scrollController.offset > 300;
+    if (show != _showScrollToTop) {
+      setState(() => _showScrollToTop = show);
+    }
+  }
+
+  void _scrollToTop() {
+    _scrollController.animateTo(
+      0,
+      duration: const Duration(milliseconds: 400),
+      curve: Curves.easeOut,
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -23,12 +62,22 @@ class AdhkarListScreen extends StatelessWidget {
       textDirection: TextDirection.rtl,
       child: Consumer<AdhkarProvider>(
         builder: (context, provider, _) {
-          final category = provider.getCategoryById(categoryId);
+          final category = provider.getCategoryById(widget.categoryId);
           if (category == null) {
             return Scaffold(
               backgroundColor: AppColors.scaffold(context),
               body: const Center(child: CircularProgressIndicator()),
             );
+          }
+
+          // Completion celebration trigger
+          if (category.isAllCompleted && !_celebrationShown) {
+            _celebrationShown = true;
+            WidgetsBinding.instance.addPostFrameCallback((_) {
+              HapticFeedback.mediumImpact();
+            });
+          } else if (!category.isAllCompleted) {
+            _celebrationShown = false;
           }
 
           return Scaffold(
@@ -37,6 +86,7 @@ class AdhkarListScreen extends StatelessWidget {
               children: [
                 // ── Main scrollable content ──
                 CustomScrollView(
+                  controller: _scrollController,
                   slivers: [
                     // ── Styled app bar (text doesn't scale) ──
                     SliverAppBar(
@@ -60,7 +110,8 @@ class AdhkarListScreen extends StatelessWidget {
                                 child: AlertDialog(
                                   backgroundColor: AppColors.card(context),
                                   shape: RoundedRectangleBorder(
-                                    borderRadius: BorderRadius.circular(16),
+                                    borderRadius: BorderRadius.circular(
+                                        AppColors.radiusM),
                                   ),
                                   title: Text(
                                     'إعادة العدادات',
@@ -93,14 +144,15 @@ class AdhkarListScreen extends StatelessWidget {
                                     ),
                                     TextButton(
                                       onPressed: () {
-                                        provider.resetCategory(categoryId);
+                                        provider.resetCategory(
+                                            widget.categoryId);
                                         Navigator.pop(ctx);
                                       },
-                                      child: const Text(
+                                      child: Text(
                                         'إعادة',
                                         style: TextStyle(
                                           fontFamily: 'Amiri',
-                                          color: AppColors.gold,
+                                          color: AppColors.goldC(context),
                                         ),
                                       ),
                                     ),
@@ -164,67 +216,102 @@ class AdhkarListScreen extends StatelessWidget {
 
                     // ── Adhkar list with diamond dividers ──
                     SliverList(
-                  delegate: SliverChildBuilderDelegate(
-                    (context, index) {
-                      // Interleave cards and dividers
-                      final itemIndex = index ~/ 2;
-                      if (index.isEven) {
-                        final dhikr = category.adhkar[itemIndex];
-                        return Padding(
-                          padding: EdgeInsets.only(
-                            top: itemIndex == 0 ? 16 : 0,
-                            bottom: itemIndex == category.adhkar.length - 1
-                                ? 32
-                                : 0,
-                          ),
-                          child: DhikrCard(
-                            dhikr: dhikr,
-                            onCounterTap: () {
-                              provider.incrementDhikr(
-                                  categoryId, dhikr.id);
-                            },
-                            onInfoTap: () {
-                              Navigator.push(
-                                context,
-                                MaterialPageRoute(
-                                  builder: (_) =>
+                      delegate: SliverChildBuilderDelegate(
+                        (context, index) {
+                          // Interleave cards and dividers
+                          final itemIndex = index ~/ 2;
+                          if (index.isEven) {
+                            final dhikr = category.adhkar[itemIndex];
+                            return Padding(
+                              padding: EdgeInsets.only(
+                                top: itemIndex == 0 ? 16 : 0,
+                                bottom:
+                                    itemIndex == category.adhkar.length - 1
+                                        ? 32
+                                        : 0,
+                              ),
+                              child: DhikrCard(
+                                dhikr: dhikr,
+                                onCounterTap: () {
+                                  provider.incrementDhikr(
+                                      widget.categoryId, dhikr.id);
+                                },
+                                onInfoTap: () {
+                                  Navigator.push(
+                                    context,
+                                    AppTransitions.fadeSlide(
                                       HadithDetailScreen(dhikr: dhikr),
-                                ),
-                              );
-                            },
-                          ),
-                        );
-                      } else {
-                        return const DiamondDivider();
-                      }
-                    },
-                    childCount: category.adhkar.length * 2 - 1,
+                                    ),
+                                  );
+                                },
+                              ),
+                            );
+                          } else {
+                            return const DiamondDivider();
+                          }
+                        },
+                        childCount: category.adhkar.length * 2 - 1,
+                      ),
+                    ),
+
+                    // ── Bottom padding for floating progress bar ──
+                    const SliverToBoxAdapter(
+                      child: SizedBox(height: 60),
+                    ),
+                  ],
+                ),
+
+                // ── Floating sticky progress bar at bottom ──
+                Positioned(
+                  left: 0,
+                  right: 0,
+                  bottom: 0,
+                  child: _FloatingProgressBar(
+                    completed: category.completedCount,
+                    total: category.totalCount,
+                    progress: category.progress,
+                    isAllCompleted: category.isAllCompleted,
+                    dark: dark,
                   ),
                 ),
 
-                // ── Bottom padding for floating progress bar ──
-                const SliverToBoxAdapter(
-                  child: SizedBox(height: 60),
+                // ── Scroll to top button ──
+                Positioned(
+                  bottom: 72,
+                  left: 20,
+                  child: AnimatedOpacity(
+                    opacity: _showScrollToTop ? 1.0 : 0.0,
+                    duration: const Duration(milliseconds: 200),
+                    child: AnimatedSlide(
+                      offset: _showScrollToTop
+                          ? Offset.zero
+                          : const Offset(0, 0.5),
+                      duration: const Duration(milliseconds: 200),
+                      child: GestureDetector(
+                        onTap: _scrollToTop,
+                        child: Container(
+                          width: 40,
+                          height: 40,
+                          decoration: BoxDecoration(
+                            shape: BoxShape.circle,
+                            color: AppColors.goldC(context),
+                            boxShadow: AppColors.elevatedShadow(context),
+                          ),
+                          child: Icon(
+                            Icons.keyboard_arrow_up_rounded,
+                            size: 24,
+                            color: dark
+                                ? AppColors.darkBg
+                                : AppColors.white,
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
                 ),
               ],
             ),
-
-            // ── Floating sticky progress bar at bottom ──
-            Positioned(
-              left: 0,
-              right: 0,
-              bottom: 0,
-              child: _FloatingProgressBar(
-                completed: category.completedCount,
-                total: category.totalCount,
-                progress: category.progress,
-                isAllCompleted: category.isAllCompleted,
-                dark: dark,
-              ),
-            ),
-          ],
-        ),
-        );
+          );
         },
       ),
     );
@@ -232,7 +319,6 @@ class AdhkarListScreen extends StatelessWidget {
 }
 
 /// A discrete floating progress bar pinned to the bottom of the screen.
-/// Shows progress as a thin animated bar with percentage, visible while scrolling.
 class _FloatingProgressBar extends StatelessWidget {
   final int completed;
   final int total;
@@ -250,7 +336,8 @@ class _FloatingProgressBar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final barColor = isAllCompleted ? AppColors.counterCompleted : AppColors.gold;
+    final barColor =
+        isAllCompleted ? AppColors.counterCompleted : AppColors.goldC(context);
     final percentage = (progress * 100).toInt();
 
     return Container(
@@ -283,24 +370,52 @@ class _FloatingProgressBar extends StatelessWidget {
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  Text(
-                    '$completed / $total',
-                    style: TextStyle(
-                      fontFamily: 'Amiri',
-                      fontSize: 13,
-                      fontWeight: FontWeight.w700,
-                      color: AppColors.textS(context),
-                    ),
+                  // Animated completion text
+                  AnimatedSwitcher(
+                    duration: const Duration(milliseconds: 300),
+                    child: isAllCompleted
+                        ? Row(
+                            key: const ValueKey('completed'),
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Icon(
+                                Icons.check_circle_rounded,
+                                size: 16,
+                                color: AppColors.counterCompleted,
+                              ),
+                              const SizedBox(width: 6),
+                              Text(
+                                'ما شاء الله! أتممت أذكارك',
+                                style: TextStyle(
+                                  fontFamily: 'Amiri',
+                                  fontSize: 13,
+                                  fontWeight: FontWeight.w700,
+                                  color: AppColors.counterCompleted,
+                                ),
+                              ),
+                            ],
+                          )
+                        : Text(
+                            '$completed / $total',
+                            key: const ValueKey('progress'),
+                            style: TextStyle(
+                              fontFamily: 'Amiri',
+                              fontSize: 13,
+                              fontWeight: FontWeight.w700,
+                              color: AppColors.textS(context),
+                            ),
+                          ),
                   ),
-                  Text(
-                    '$percentage%',
-                    style: TextStyle(
-                      fontFamily: 'Amiri',
-                      fontSize: 13,
-                      fontWeight: FontWeight.w700,
-                      color: barColor,
+                  if (!isAllCompleted)
+                    Text(
+                      '$percentage%',
+                      style: TextStyle(
+                        fontFamily: 'Amiri',
+                        fontSize: 13,
+                        fontWeight: FontWeight.w700,
+                        color: barColor,
+                      ),
                     ),
-                  ),
                 ],
               ),
             ),

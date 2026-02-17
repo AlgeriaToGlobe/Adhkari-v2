@@ -287,40 +287,34 @@ class _GradeBadge extends StatelessWidget {
 
   const _GradeBadge({required this.grade});
 
-  Color get _backgroundColor {
-    switch (grade) {
-      case HadithGrade.sahih:
-      case HadithGrade.mutawatir:
-        return AppColors.counterCompleted.withValues(alpha: 0.12);
-      case HadithGrade.hasan:
-        return AppColors.gold.withValues(alpha: 0.12);
-      case HadithGrade.daif:
-        return AppColors.brownLight.withValues(alpha: 0.12);
-      case HadithGrade.mawdu:
-        return Colors.red.withValues(alpha: 0.08);
-    }
-  }
-
-  Color get _textColor {
-    switch (grade) {
-      case HadithGrade.sahih:
-      case HadithGrade.mutawatir:
-        return AppColors.counterCompleted;
-      case HadithGrade.hasan:
-        return AppColors.goldDark;
-      case HadithGrade.daif:
-        return AppColors.brownLight;
-      case HadithGrade.mawdu:
-        return Colors.red.shade700;
-    }
-  }
-
   @override
   Widget build(BuildContext context) {
+    final dark = AppColors.isDark(context);
+    final accentGold = AppColors.goldC(context);
+
+    Color backgroundColor;
+    Color textColor;
+
+    switch (grade) {
+      case HadithGrade.sahih:
+      case HadithGrade.mutawatir:
+        backgroundColor = AppColors.counterCompleted.withValues(alpha: 0.12);
+        textColor = AppColors.counterCompleted;
+      case HadithGrade.hasan:
+        backgroundColor = accentGold.withValues(alpha: 0.12);
+        textColor = accentGold;
+      case HadithGrade.daif:
+        backgroundColor = AppColors.brownLightC(context).withValues(alpha: 0.12);
+        textColor = AppColors.brownLightC(context);
+      case HadithGrade.mawdu:
+        backgroundColor = Colors.red.withValues(alpha: 0.08);
+        textColor = dark ? Colors.red.shade400 : Colors.red.shade700;
+    }
+
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
       decoration: BoxDecoration(
-        color: _backgroundColor,
+        color: backgroundColor,
         borderRadius: BorderRadius.circular(6),
       ),
       child: Text(
@@ -329,7 +323,7 @@ class _GradeBadge extends StatelessWidget {
           fontFamily: 'Amiri',
           fontSize: 11,
           fontWeight: FontWeight.w700,
-          color: _textColor,
+          color: textColor,
         ),
       ),
     );

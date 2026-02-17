@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import '../models/dhikr.dart';
 import '../theme/app_colors.dart';
 
@@ -23,6 +24,23 @@ class HadithDetailScreen extends StatelessWidget {
           backgroundColor: dark ? AppColors.darkSurface : AppColors.brown,
           foregroundColor: dark ? AppColors.darkTextPrimary : AppColors.white,
           centerTitle: true,
+          actions: [
+            IconButton(
+              icon: const Icon(Icons.copy_outlined, size: 22),
+              tooltip: 'نسخ',
+              onPressed: () {
+                final text = StringBuffer(dhikr.text);
+                if (dhikr.fadl != null) text.write('\n\n${dhikr.fadl}');
+                if (dhikr.reference != null) text.write('\n\n${dhikr.reference}');
+                Clipboard.setData(ClipboardData(text: text.toString()));
+                AppColors.showStyledSnackBar(
+                  context,
+                  'تم النسخ',
+                  icon: Icons.check,
+                );
+              },
+            ),
+          ],
         ),
         body: SingleChildScrollView(
           padding: const EdgeInsets.all(20),
@@ -86,7 +104,7 @@ class HadithDetailScreen extends StatelessWidget {
                 title: 'درجة الحديث',
                 content: dhikr.grade.arabicLabel,
                 icon: Icons.verified_outlined,
-                trailing: _buildGradeBadge(),
+                trailing: _buildGradeBadge(context),
               ),
 
               if (dhikr.notes != null)
@@ -102,7 +120,9 @@ class HadithDetailScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildGradeBadge() {
+  Widget _buildGradeBadge(BuildContext context) {
+    final dark = AppColors.isDark(context);
+    final accentGold = AppColors.goldC(context);
     Color bgColor;
     Color textColor;
 
@@ -111,19 +131,15 @@ class HadithDetailScreen extends StatelessWidget {
       case HadithGrade.mutawatir:
         bgColor = AppColors.counterCompleted.withValues(alpha: 0.15);
         textColor = AppColors.counterCompleted;
-        break;
       case HadithGrade.hasan:
-        bgColor = AppColors.gold.withValues(alpha: 0.15);
-        textColor = AppColors.goldDark;
-        break;
+        bgColor = accentGold.withValues(alpha: 0.15);
+        textColor = accentGold;
       case HadithGrade.daif:
-        bgColor = AppColors.brownLight.withValues(alpha: 0.15);
-        textColor = AppColors.brownLight;
-        break;
+        bgColor = AppColors.brownLightC(context).withValues(alpha: 0.15);
+        textColor = AppColors.brownLightC(context);
       case HadithGrade.mawdu:
         bgColor = Colors.red.withValues(alpha: 0.1);
-        textColor = Colors.red.shade700;
-        break;
+        textColor = dark ? Colors.red.shade400 : Colors.red.shade700;
     }
 
     return Container(

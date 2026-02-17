@@ -28,6 +28,7 @@ class _MainShellState extends State<MainShell> {
   @override
   Widget build(BuildContext context) {
     final dark = AppColors.isDark(context);
+    final accentGold = AppColors.goldC(context);
 
     return Directionality(
       textDirection: TextDirection.rtl,
@@ -52,49 +53,95 @@ class _MainShellState extends State<MainShell> {
             onTap: (index) => setState(() => _currentIndex = index),
             type: BottomNavigationBarType.fixed,
             backgroundColor: AppColors.card(context),
-            selectedItemColor: dark ? AppColors.darkGold : AppColors.brown,
+            selectedItemColor: accentGold,
             unselectedItemColor: AppColors.brownLightC(context),
             selectedFontSize: 12,
             unselectedFontSize: 11,
             selectedLabelStyle: const TextStyle(
               fontFamily: 'Amiri',
               fontSize: 12,
+              fontWeight: FontWeight.w700,
             ),
             unselectedLabelStyle: const TextStyle(
               fontFamily: 'Amiri',
               fontSize: 11,
+              fontWeight: FontWeight.w400,
             ),
             elevation: 0,
-            items: const [
-              BottomNavigationBarItem(
-                icon: Icon(Icons.home_outlined),
-                activeIcon: Icon(Icons.home),
+            items: [
+              _buildNavItem(
+                icon: Icons.home_outlined,
+                activeIcon: Icons.home,
                 label: 'الرئيسية',
+                isActive: _currentIndex == 0,
+                accentGold: accentGold,
               ),
-              BottomNavigationBarItem(
-                icon: Icon(Icons.calendar_month_outlined),
-                activeIcon: Icon(Icons.calendar_month),
+              _buildNavItem(
+                icon: Icons.calendar_month_outlined,
+                activeIcon: Icons.calendar_month,
                 label: 'التقويم',
+                isActive: _currentIndex == 1,
+                accentGold: accentGold,
               ),
-              BottomNavigationBarItem(
-                icon: Icon(Icons.menu_book_outlined),
-                activeIcon: Icon(Icons.menu_book),
+              _buildNavItem(
+                icon: Icons.menu_book_outlined,
+                activeIcon: Icons.menu_book,
                 label: 'الأذكار',
+                isActive: _currentIndex == 2,
+                accentGold: accentGold,
               ),
-              BottomNavigationBarItem(
-                icon: Icon(Icons.edit_note_outlined),
-                activeIcon: Icon(Icons.edit_note),
+              _buildNavItem(
+                icon: Icons.edit_note_outlined,
+                activeIcon: Icons.edit_note,
                 label: 'الذكر الحر',
+                isActive: _currentIndex == 3,
+                accentGold: accentGold,
               ),
-              BottomNavigationBarItem(
-                icon: Icon(Icons.settings_outlined),
-                activeIcon: Icon(Icons.settings),
+              _buildNavItem(
+                icon: Icons.settings_outlined,
+                activeIcon: Icons.settings,
                 label: 'الإعدادات',
+                isActive: _currentIndex == 4,
+                accentGold: accentGold,
               ),
             ],
           ),
         ),
       ),
+    );
+  }
+
+  BottomNavigationBarItem _buildNavItem({
+    required IconData icon,
+    required IconData activeIcon,
+    required String label,
+    required bool isActive,
+    required Color accentGold,
+  }) {
+    return BottomNavigationBarItem(
+      icon: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(icon, size: 24),
+          const SizedBox(height: 2),
+        ],
+      ),
+      activeIcon: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(activeIcon, size: 26),
+          const SizedBox(height: 2),
+          Container(
+            width: 4,
+            height: 4,
+            decoration: BoxDecoration(
+              shape: BoxShape.circle,
+              color: accentGold,
+            ),
+          ),
+        ],
+      ),
+      label: label,
     );
   }
 }

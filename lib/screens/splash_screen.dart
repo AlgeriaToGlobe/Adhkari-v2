@@ -86,7 +86,7 @@ class _SplashScreenState extends State<SplashScreen>
                 width: 180,
                 height: 200,
                 child: CustomPaint(
-                  painter: _SplashArchPainter(),
+                  painter: _SplashArchPainter(isDark: dark),
                   child: Center(
                     child: Padding(
                       padding: const EdgeInsets.only(top: 20),
@@ -150,14 +150,19 @@ class _SplashScreenState extends State<SplashScreen>
 }
 
 class _SplashArchPainter extends CustomPainter {
+  final bool isDark;
+
+  _SplashArchPainter({required this.isDark});
+
   @override
   void paint(Canvas canvas, Size size) {
     final w = size.width;
     final h = size.height;
+    final goldColor = isDark ? AppColors.darkGold : AppColors.gold;
 
     // Outer arch
     final outerPaint = Paint()
-      ..color = AppColors.gold.withValues(alpha: 0.4)
+      ..color = goldColor.withValues(alpha: 0.4)
       ..style = PaintingStyle.stroke
       ..strokeWidth = 2;
 
@@ -173,7 +178,7 @@ class _SplashArchPainter extends CustomPainter {
 
     // Inner arch
     final innerPaint = Paint()
-      ..color = AppColors.gold.withValues(alpha: 0.2)
+      ..color = goldColor.withValues(alpha: 0.2)
       ..style = PaintingStyle.stroke
       ..strokeWidth = 1;
 
@@ -193,5 +198,6 @@ class _SplashArchPainter extends CustomPainter {
   }
 
   @override
-  bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
+  bool shouldRepaint(covariant _SplashArchPainter oldDelegate) =>
+      oldDelegate.isDark != isDark;
 }
