@@ -55,6 +55,7 @@ class _TaqwimScreenState extends State<TaqwimScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final dark = AppColors.isDark(context);
     final daysInMonth = HijriDate.daysInMonth(_displayYear, _displayMonth);
     final firstDayCol = HijriDate.firstDayColumn(_displayYear, _displayMonth);
     final monthEvents = IslamicEvents.getMonthEvents(_displayMonth);
@@ -64,7 +65,7 @@ class _TaqwimScreenState extends State<TaqwimScreen> {
     return Directionality(
       textDirection: TextDirection.rtl,
       child: Scaffold(
-        backgroundColor: AppColors.beigeLight,
+        backgroundColor: AppColors.scaffold(context),
         body: SingleChildScrollView(
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -86,14 +87,15 @@ class _TaqwimScreenState extends State<TaqwimScreen> {
                       vertical: 14,
                     ),
                     decoration: BoxDecoration(
-                      color: AppColors.white,
+                      color: AppColors.card(context),
                       borderRadius: BorderRadius.circular(14),
                       border: Border.all(
-                        color: AppColors.divider.withValues(alpha: 0.5),
+                        color: AppColors.dividerC(context).withValues(alpha: 0.5),
                       ),
                       boxShadow: [
                         BoxShadow(
-                          color: AppColors.brown.withValues(alpha: 0.06),
+                          color: (dark ? Colors.black : AppColors.brown)
+                              .withValues(alpha: 0.06),
                           blurRadius: 10,
                           offset: const Offset(0, 4),
                         ),
@@ -107,11 +109,11 @@ class _TaqwimScreenState extends State<TaqwimScreen> {
                             _today.formatted,
                             textDirection: TextDirection.rtl,
                             textAlign: TextAlign.right,
-                            style: const TextStyle(
+                            style: TextStyle(
                               fontFamily: 'Amiri',
                               fontSize: 17,
                               fontWeight: FontWeight.w700,
-                              color: AppColors.textPrimary,
+                              color: AppColors.textP(context),
                               height: 1.4,
                             ),
                           ),
@@ -122,12 +124,12 @@ class _TaqwimScreenState extends State<TaqwimScreen> {
                           height: 40,
                           decoration: BoxDecoration(
                             shape: BoxShape.circle,
-                            color: AppColors.gold.withValues(alpha: 0.1),
+                            color: AppColors.goldC(context).withValues(alpha: 0.1),
                           ),
-                          child: const Icon(
+                          child: Icon(
                             Icons.calendar_month_rounded,
                             size: 20,
-                            color: AppColors.gold,
+                            color: AppColors.goldC(context),
                           ),
                         ),
                       ],
@@ -147,7 +149,9 @@ class _TaqwimScreenState extends State<TaqwimScreen> {
                     vertical: 10,
                   ),
                   decoration: BoxDecoration(
-                    gradient: AppColors.headerGradientSubtle,
+                    gradient: dark
+                        ? AppColors.darkHeaderGradientSubtle
+                        : AppColors.headerGradientSubtle,
                     borderRadius: BorderRadius.circular(14),
                   ),
                   child: Row(
@@ -157,9 +161,9 @@ class _TaqwimScreenState extends State<TaqwimScreen> {
                       // Next (right arrow in RTL = previous month visually)
                       IconButton(
                         onPressed: _nextMonth,
-                        icon: const Icon(
+                        icon: Icon(
                           Icons.chevron_right_rounded,
-                          color: AppColors.gold,
+                          color: dark ? AppColors.darkGold : AppColors.gold,
                           size: 28,
                         ),
                       ),
@@ -170,11 +174,11 @@ class _TaqwimScreenState extends State<TaqwimScreen> {
                           children: [
                             Text(
                               HijriDate.monthNames[_displayMonth - 1],
-                              style: const TextStyle(
+                              style: TextStyle(
                                 fontFamily: 'Amiri',
                                 fontSize: 20,
                                 fontWeight: FontWeight.w700,
-                                color: AppColors.gold,
+                                color: dark ? AppColors.darkGold : AppColors.gold,
                               ),
                             ),
                             Text(
@@ -192,9 +196,9 @@ class _TaqwimScreenState extends State<TaqwimScreen> {
                       // Previous
                       IconButton(
                         onPressed: _previousMonth,
-                        icon: const Icon(
+                        icon: Icon(
                           Icons.chevron_left_rounded,
-                          color: AppColors.gold,
+                          color: dark ? AppColors.darkGold : AppColors.gold,
                           size: 28,
                         ),
                       ),
@@ -211,14 +215,15 @@ class _TaqwimScreenState extends State<TaqwimScreen> {
                 child: Container(
                   padding: const EdgeInsets.all(12),
                   decoration: BoxDecoration(
-                    color: AppColors.white,
+                    color: AppColors.card(context),
                     borderRadius: BorderRadius.circular(16),
                     border: Border.all(
-                      color: AppColors.divider.withValues(alpha: 0.5),
+                      color: AppColors.dividerC(context).withValues(alpha: 0.5),
                     ),
                     boxShadow: [
                       BoxShadow(
-                        color: AppColors.brown.withValues(alpha: 0.04),
+                        color: (dark ? Colors.black : AppColors.brown)
+                            .withValues(alpha: 0.04),
                         blurRadius: 8,
                         offset: const Offset(0, 2),
                       ),
@@ -250,7 +255,7 @@ class _TaqwimScreenState extends State<TaqwimScreen> {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      const Text(
+                      Text(
                         'المناسبات الإسلامية',
                         textDirection: TextDirection.rtl,
                         textAlign: TextAlign.right,
@@ -258,7 +263,7 @@ class _TaqwimScreenState extends State<TaqwimScreen> {
                           fontFamily: 'Amiri',
                           fontSize: 18,
                           fontWeight: FontWeight.w700,
-                          color: AppColors.textPrimary,
+                          color: AppColors.textP(context),
                         ),
                       ),
                       const SizedBox(height: 12),
@@ -277,10 +282,10 @@ class _TaqwimScreenState extends State<TaqwimScreen> {
                   child: Container(
                     padding: const EdgeInsets.all(20),
                     decoration: BoxDecoration(
-                      color: AppColors.white,
+                      color: AppColors.card(context),
                       borderRadius: BorderRadius.circular(14),
                       border: Border.all(
-                        color: AppColors.divider.withValues(alpha: 0.3),
+                        color: AppColors.dividerC(context).withValues(alpha: 0.3),
                       ),
                     ),
                     child: Text(
@@ -290,7 +295,7 @@ class _TaqwimScreenState extends State<TaqwimScreen> {
                       style: TextStyle(
                         fontFamily: 'Amiri',
                         fontSize: 14,
-                        color: AppColors.textSecondary.withValues(alpha: 0.7),
+                        color: AppColors.textS(context).withValues(alpha: 0.7),
                       ),
                     ),
                   ),
@@ -321,8 +326,8 @@ class _TaqwimScreenState extends State<TaqwimScreen> {
                 fontSize: 13,
                 fontWeight: FontWeight.w700,
                 color: isFriday
-                    ? AppColors.gold
-                    : AppColors.textSecondary,
+                    ? AppColors.goldC(context)
+                    : AppColors.textS(context),
               ),
             ),
           ),
@@ -337,6 +342,7 @@ class _TaqwimScreenState extends State<TaqwimScreen> {
     Map<int, List<IslamicEvent>> monthEvents,
     bool isCurrentMonth,
   ) {
+    final accentGold = AppColors.goldC(context);
     // Build rows of 7 cells each
     final List<Widget> rows = [];
     int dayCounter = 1;
@@ -369,9 +375,9 @@ class _TaqwimScreenState extends State<TaqwimScreen> {
                   margin: const EdgeInsets.all(2),
                   decoration: BoxDecoration(
                     color: isToday
-                        ? AppColors.gold
+                        ? accentGold
                         : hasEvent
-                            ? AppColors.gold.withValues(alpha: 0.08)
+                            ? accentGold.withValues(alpha: 0.08)
                             : null,
                     borderRadius: BorderRadius.circular(10),
                     border: isToday
@@ -379,7 +385,7 @@ class _TaqwimScreenState extends State<TaqwimScreen> {
                         : hasEvent
                             ? Border.all(
                                 color:
-                                    AppColors.gold.withValues(alpha: 0.3),
+                                    accentGold.withValues(alpha: 0.3),
                               )
                             : null,
                   ),
@@ -397,8 +403,8 @@ class _TaqwimScreenState extends State<TaqwimScreen> {
                           color: isToday
                               ? AppColors.white
                               : isFriday
-                                  ? AppColors.gold
-                                  : AppColors.textPrimary,
+                                  ? accentGold
+                                  : AppColors.textP(context),
                           height: 1.2,
                         ),
                       ),
@@ -407,9 +413,9 @@ class _TaqwimScreenState extends State<TaqwimScreen> {
                           margin: const EdgeInsets.only(top: 2),
                           width: 5,
                           height: 5,
-                          decoration: const BoxDecoration(
+                          decoration: BoxDecoration(
                             shape: BoxShape.circle,
-                            color: AppColors.gold,
+                            color: accentGold,
                           ),
                         ),
                     ],
@@ -431,6 +437,8 @@ class _TaqwimScreenState extends State<TaqwimScreen> {
   }
 
   List<Widget> _buildEventCards(Map<int, List<IslamicEvent>> monthEvents) {
+    final dark = AppColors.isDark(context);
+    final accentGold = AppColors.goldC(context);
     final List<Widget> cards = [];
     final sortedDays = monthEvents.keys.toList()..sort();
 
@@ -443,14 +451,15 @@ class _TaqwimScreenState extends State<TaqwimScreen> {
             child: Container(
               padding: const EdgeInsets.all(14),
               decoration: BoxDecoration(
-                color: AppColors.white,
+                color: AppColors.card(context),
                 borderRadius: BorderRadius.circular(12),
                 border: Border.all(
-                  color: AppColors.gold.withValues(alpha: 0.25),
+                  color: accentGold.withValues(alpha: 0.25),
                 ),
                 boxShadow: [
                   BoxShadow(
-                    color: AppColors.brown.withValues(alpha: 0.03),
+                    color: (dark ? Colors.black : AppColors.brown)
+                        .withValues(alpha: 0.03),
                     blurRadius: 6,
                     offset: const Offset(0, 2),
                   ),
@@ -465,20 +474,20 @@ class _TaqwimScreenState extends State<TaqwimScreen> {
                     width: 40,
                     height: 40,
                     decoration: BoxDecoration(
-                      color: AppColors.gold.withValues(alpha: 0.1),
+                      color: accentGold.withValues(alpha: 0.1),
                       borderRadius: BorderRadius.circular(10),
                       border: Border.all(
-                        color: AppColors.gold.withValues(alpha: 0.3),
+                        color: accentGold.withValues(alpha: 0.3),
                       ),
                     ),
                     child: Center(
                       child: Text(
                         '$day',
-                        style: const TextStyle(
+                        style: TextStyle(
                           fontFamily: 'Amiri',
                           fontSize: 16,
                           fontWeight: FontWeight.w700,
-                          color: AppColors.gold,
+                          color: accentGold,
                         ),
                       ),
                     ),
@@ -492,11 +501,11 @@ class _TaqwimScreenState extends State<TaqwimScreen> {
                         Text(
                           event.title,
                           textDirection: TextDirection.rtl,
-                          style: const TextStyle(
+                          style: TextStyle(
                             fontFamily: 'Amiri',
                             fontSize: 15,
                             fontWeight: FontWeight.w700,
-                            color: AppColors.textPrimary,
+                            color: AppColors.textP(context),
                             height: 1.4,
                           ),
                         ),
@@ -504,10 +513,10 @@ class _TaqwimScreenState extends State<TaqwimScreen> {
                         Text(
                           event.description,
                           textDirection: TextDirection.rtl,
-                          style: const TextStyle(
+                          style: TextStyle(
                             fontFamily: 'Amiri',
                             fontSize: 13,
-                            color: AppColors.textSecondary,
+                            color: AppColors.textS(context),
                             height: 1.5,
                           ),
                         ),
@@ -519,7 +528,7 @@ class _TaqwimScreenState extends State<TaqwimScreen> {
                             style: TextStyle(
                               fontFamily: 'Amiri',
                               fontSize: 11,
-                              color: AppColors.gold.withValues(alpha: 0.8),
+                              color: accentGold.withValues(alpha: 0.8),
                               height: 1.4,
                             ),
                           ),
@@ -539,6 +548,7 @@ class _TaqwimScreenState extends State<TaqwimScreen> {
   }
 
   void _showDayEvents(int day, List<IslamicEvent> events) {
+    final accentGold = AppColors.goldC(context);
     showModalBottomSheet(
       context: context,
       backgroundColor: Colors.transparent,
@@ -546,9 +556,9 @@ class _TaqwimScreenState extends State<TaqwimScreen> {
         return Directionality(
           textDirection: TextDirection.rtl,
           child: Container(
-            decoration: const BoxDecoration(
-              color: AppColors.beigeLight,
-              borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+            decoration: BoxDecoration(
+              color: AppColors.scaffold(context),
+              borderRadius: const BorderRadius.vertical(top: Radius.circular(20)),
             ),
             padding: const EdgeInsets.all(20),
             child: Column(
@@ -561,7 +571,7 @@ class _TaqwimScreenState extends State<TaqwimScreen> {
                     width: 40,
                     height: 4,
                     decoration: BoxDecoration(
-                      color: AppColors.divider,
+                      color: AppColors.dividerC(context),
                       borderRadius: BorderRadius.circular(2),
                     ),
                   ),
@@ -570,11 +580,11 @@ class _TaqwimScreenState extends State<TaqwimScreen> {
                 // Date title
                 Text(
                   '$day ${HijriDate.monthNames[_displayMonth - 1]} $_displayYear هـ',
-                  style: const TextStyle(
+                  style: TextStyle(
                     fontFamily: 'Amiri',
                     fontSize: 18,
                     fontWeight: FontWeight.w700,
-                    color: AppColors.textPrimary,
+                    color: AppColors.textP(context),
                   ),
                 ),
                 const SizedBox(height: 12),
@@ -585,10 +595,10 @@ class _TaqwimScreenState extends State<TaqwimScreen> {
                         width: double.infinity,
                         padding: const EdgeInsets.all(14),
                         decoration: BoxDecoration(
-                          color: AppColors.white,
+                          color: AppColors.card(context),
                           borderRadius: BorderRadius.circular(12),
                           border: Border.all(
-                            color: AppColors.gold.withValues(alpha: 0.25),
+                            color: accentGold.withValues(alpha: 0.25),
                           ),
                         ),
                         child: Column(
@@ -596,21 +606,21 @@ class _TaqwimScreenState extends State<TaqwimScreen> {
                           children: [
                             Text(
                               event.title,
-                              style: const TextStyle(
+                              style: TextStyle(
                                 fontFamily: 'Amiri',
                                 fontSize: 16,
                                 fontWeight: FontWeight.w700,
-                                color: AppColors.textPrimary,
+                                color: AppColors.textP(context),
                                 height: 1.4,
                               ),
                             ),
                             const SizedBox(height: 4),
                             Text(
                               event.description,
-                              style: const TextStyle(
+                              style: TextStyle(
                                 fontFamily: 'Amiri',
                                 fontSize: 14,
-                                color: AppColors.textSecondary,
+                                color: AppColors.textS(context),
                                 height: 1.5,
                               ),
                             ),
@@ -621,7 +631,7 @@ class _TaqwimScreenState extends State<TaqwimScreen> {
                                   Icon(
                                     Icons.menu_book_outlined,
                                     size: 14,
-                                    color: AppColors.gold
+                                    color: accentGold
                                         .withValues(alpha: 0.7),
                                   ),
                                   const SizedBox(width: 6),
@@ -631,7 +641,7 @@ class _TaqwimScreenState extends State<TaqwimScreen> {
                                       style: TextStyle(
                                         fontFamily: 'Amiri',
                                         fontSize: 12,
-                                        color: AppColors.gold
+                                        color: accentGold
                                             .withValues(alpha: 0.8),
                                         height: 1.4,
                                       ),
