@@ -79,17 +79,12 @@ class _DhikrCardState extends State<DhikrCard>
             border: Border.all(
               color: dhikr.isCompleted
                   ? AppColors.counterCompleted.withValues(alpha: 0.2)
-                  : AppColors.dividerC(context).withValues(alpha: 0.6),
+                  : dark
+                      ? Colors.white.withValues(alpha: 0.08)
+                      : AppColors.dividerC(context).withValues(alpha: 0.6),
               width: 1,
             ),
-            boxShadow: [
-              BoxShadow(
-                color: (dark ? Colors.black : AppColors.brown)
-                    .withValues(alpha: dark ? 0.15 : 0.04),
-                blurRadius: 12,
-                offset: const Offset(0, 4),
-              ),
-            ],
+            boxShadow: AppColors.cardShadow(context),
           ),
           child: Column(
             children: [

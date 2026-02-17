@@ -89,23 +89,55 @@ class AppColors {
   static const double radiusL = 20;
 
   // ── Shadow helpers ──
-  static List<BoxShadow> cardShadow(BuildContext context) => [
-        BoxShadow(
-          color: (isDark(context) ? Colors.black : brown)
-              .withValues(alpha: isDark(context) ? 0.15 : 0.04),
-          blurRadius: 8,
-          offset: const Offset(0, 2),
-        ),
-      ];
+  // Light mode: soft, diffused multi-layer shadows for depth
+  // Dark mode: no shadows (invisible on dark bg); use cardBorder() instead
+  static List<BoxShadow> cardShadow(BuildContext context) => isDark(context)
+      ? [] // dark mode cards rely on border, not shadow
+      : [
+          BoxShadow(
+            color: brown.withValues(alpha: 0.06),
+            blurRadius: 12,
+            spreadRadius: 0,
+            offset: const Offset(0, 2),
+          ),
+          BoxShadow(
+            color: brown.withValues(alpha: 0.03),
+            blurRadius: 24,
+            spreadRadius: 0,
+            offset: const Offset(0, 6),
+          ),
+        ];
 
-  static List<BoxShadow> elevatedShadow(BuildContext context) => [
-        BoxShadow(
-          color: (isDark(context) ? Colors.black : brown)
-              .withValues(alpha: isDark(context) ? 0.25 : 0.08),
-          blurRadius: 16,
-          offset: const Offset(0, 6),
-        ),
-      ];
+  static List<BoxShadow> elevatedShadow(BuildContext context) => isDark(context)
+      ? [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.3),
+            blurRadius: 16,
+            offset: const Offset(0, 6),
+          ),
+        ]
+      : [
+          BoxShadow(
+            color: brown.withValues(alpha: 0.08),
+            blurRadius: 16,
+            spreadRadius: 0,
+            offset: const Offset(0, 4),
+          ),
+          BoxShadow(
+            color: brown.withValues(alpha: 0.04),
+            blurRadius: 32,
+            spreadRadius: 0,
+            offset: const Offset(0, 8),
+          ),
+        ];
+
+  /// Border for dark-mode cards: subtle light stroke to separate from bg.
+  static Border? cardBorder(BuildContext context) => isDark(context)
+      ? Border.all(
+          color: Colors.white.withValues(alpha: 0.08),
+          width: 1,
+        )
+      : null;
 
   // ── Styled SnackBar helper ──
   static void showStyledSnackBar(BuildContext context, String message,
@@ -179,4 +211,28 @@ class AppColors {
     end: Alignment.bottomRight,
     colors: [Color(0xFF262422), Color(0xFF1E1D1B)],
   );
+
+  /// Gold-leaf gradient for premium icon/text treatment.
+  static LinearGradient goldLeafGradient(BuildContext context) =>
+      isDark(context)
+          ? const LinearGradient(
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+              colors: [
+                Color(0xFFF5D77A), // bright gold highlight
+                Color(0xFFEBC06D), // luminous gold
+                Color(0xFFD4A847), // deeper gold
+                Color(0xFFEBC06D), // luminous gold
+              ],
+            )
+          : const LinearGradient(
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+              colors: [
+                Color(0xFFD4B878), // gold light
+                Color(0xFFC4A35A), // gold
+                Color(0xFFA88B3D), // gold dark
+                Color(0xFFC4A35A), // gold
+              ],
+            );
 }

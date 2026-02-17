@@ -118,6 +118,8 @@ class _MainShellState extends State<MainShell> {
     required bool isActive,
     required Color accentGold,
   }) {
+    final dark = AppColors.isDark(context);
+
     return BottomNavigationBarItem(
       icon: Column(
         mainAxisSize: MainAxisSize.min,
@@ -129,7 +131,23 @@ class _MainShellState extends State<MainShell> {
       activeIcon: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Icon(activeIcon, size: 26),
+          // In dark mode, wrap active icon with a gold glow
+          if (dark)
+            Container(
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                boxShadow: [
+                  BoxShadow(
+                    color: accentGold.withValues(alpha: 0.35),
+                    blurRadius: 16,
+                    spreadRadius: 2,
+                  ),
+                ],
+              ),
+              child: Icon(activeIcon, size: 26),
+            )
+          else
+            Icon(activeIcon, size: 26),
           const SizedBox(height: 2),
           Container(
             width: 4,
@@ -137,6 +155,15 @@ class _MainShellState extends State<MainShell> {
             decoration: BoxDecoration(
               shape: BoxShape.circle,
               color: accentGold,
+              boxShadow: dark
+                  ? [
+                      BoxShadow(
+                        color: accentGold.withValues(alpha: 0.5),
+                        blurRadius: 6,
+                        spreadRadius: 1,
+                      ),
+                    ]
+                  : [],
             ),
           ),
         ],
