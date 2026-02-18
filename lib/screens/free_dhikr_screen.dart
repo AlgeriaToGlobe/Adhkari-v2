@@ -213,7 +213,7 @@ class FreeDhikrScreen extends StatelessWidget {
     return Directionality(
       textDirection: TextDirection.rtl,
       child: Scaffold(
-        backgroundColor: AppColors.scaffold(context),
+        backgroundColor: Colors.transparent,
         body: SafeArea(
           child: Consumer<AdhkarProvider>(
             builder: (context, provider, _) {

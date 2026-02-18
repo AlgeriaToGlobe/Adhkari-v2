@@ -318,7 +318,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
     return Directionality(
       textDirection: TextDirection.rtl,
       child: Scaffold(
-        backgroundColor: AppColors.scaffold(context),
+        backgroundColor: Colors.transparent,
         body: SafeArea(
           child: ListView(
             padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
