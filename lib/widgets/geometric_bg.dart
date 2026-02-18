@@ -4,15 +4,15 @@ import '../theme/app_colors.dart';
 /// Islamic geometric background overlay.
 ///
 /// Tiles `assets/images/geometric_pattern.png` across the entire area,
-/// then fades it to the solid scaffold colour at the top so the page
+/// then fades to the solid scaffold colour at the top so the page
 /// title sits on a clean background.
 ///
-/// Usage: wrap any screen body with `GeometricBg(child: …)`.
-/// Place your pattern image at  assets/images/geometric_pattern.png
+/// Place your pattern image at:  assets/images/geometric_pattern.png
 ///
-/// Opacity:
-///   Dark mode  → less transparent (more visible)
-///   Light mode → more transparent (subtler)
+/// Tune these values to taste:
+///   - [scale]      → higher = smaller tiles  (default 3.5)
+///   - [fadeHeight]  → height of the top fade zone (default 140)
+///   - opacity       → line 38 (dark) / line 38 (light)
 class GeometricBg extends StatelessWidget {
   final Widget child;
 
@@ -22,7 +22,7 @@ class GeometricBg extends StatelessWidget {
   const GeometricBg({
     super.key,
     required this.child,
-    this.fadeHeight = 220,
+    this.fadeHeight = 140,
   });
 
   @override
@@ -33,19 +33,24 @@ class GeometricBg extends StatelessWidget {
     return Stack(
       children: [
         // 1. Tiled pattern image
+        //    scale: controls tile size (higher = smaller tiles).
+        //    Adjust the value if tiles are too big / too small.
         Positioned.fill(
           child: Opacity(
-            opacity: dark ? 0.07 : 0.04,
-            child: Image.asset(
-              'assets/images/geometric_pattern.png',
+            opacity: dark ? 0.07 : 0.05,
+            child: Image(
+              image: const ExactAssetImage(
+                'assets/images/geometric_pattern.png',
+                scale: 3.5,
+              ),
               repeat: ImageRepeat.repeat,
               fit: BoxFit.none,
             ),
           ),
         ),
 
-        // 2. Top fade: solid scaffold colour → transparent
-        //    Keeps the title area clean, pattern appears below.
+        // 2. Top fade: solid scaffold colour → transparent.
+        //    Keeps the title area clean, pattern fades in below.
         Positioned(
           top: 0,
           left: 0,
@@ -59,10 +64,8 @@ class GeometricBg extends StatelessWidget {
                   end: Alignment.bottomCenter,
                   colors: [
                     scaffoldColor,
-                    scaffoldColor,
                     scaffoldColor.withValues(alpha: 0),
                   ],
-                  stops: const [0.0, 0.45, 1.0],
                 ),
               ),
             ),
