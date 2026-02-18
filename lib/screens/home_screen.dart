@@ -108,9 +108,11 @@ class HomeScreen extends StatelessWidget {
                           decoration: BoxDecoration(
                             color: AppColors.card(context),
                             borderRadius: BorderRadius.circular(AppColors.radiusM),
-                            border: Border.all(
-                              color: AppColors.dividerC(context).withValues(alpha: 0.5),
-                            ),
+                            border: dark
+                                ? AppColors.cardBorder(context)
+                                : Border.all(
+                                    color: AppColors.dividerC(context).withValues(alpha: 0.5),
+                                  ),
                             boxShadow: AppColors.cardShadow(context),
                           ),
                           child: Row(
@@ -403,6 +405,7 @@ class _StreakWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final dark = AppColors.isDark(context);
     final accentGold = AppColors.goldC(context);
     final todayIndex = DateTime.now().weekday - 1; // 0=Monday
 
@@ -413,9 +416,11 @@ class _StreakWidget extends StatelessWidget {
         decoration: BoxDecoration(
           color: AppColors.card(context),
           borderRadius: BorderRadius.circular(AppColors.radiusM),
-          border: Border.all(
-            color: AppColors.dividerC(context).withValues(alpha: 0.5),
-          ),
+          border: dark
+              ? AppColors.cardBorder(context)
+              : Border.all(
+                  color: AppColors.dividerC(context).withValues(alpha: 0.5),
+                ),
           boxShadow: AppColors.cardShadow(context),
         ),
         child: Column(
@@ -514,6 +519,7 @@ class _QuickAccessButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final accentGold = AppColors.goldC(context);
+    final goldGradient = AppColors.goldLeafGradient(context);
 
     return GestureDetector(
       onTap: onTap,
@@ -531,22 +537,34 @@ class _QuickAccessButton extends StatelessWidget {
                 width: 1.5,
               ),
             ),
-            child: Icon(
-              icon,
-              size: 24,
-              color: accentGold,
+            // Gold-leaf gradient on the icon
+            child: ShaderMask(
+              shaderCallback: (bounds) =>
+                  goldGradient.createShader(bounds),
+              blendMode: BlendMode.srcIn,
+              child: Icon(
+                icon,
+                size: 24,
+                color: Colors.white, // base color for shader
+              ),
             ),
           ),
           const SizedBox(height: 8),
-          Text(
-            label,
-            textDirection: TextDirection.rtl,
-            textAlign: TextAlign.center,
-            style: TextStyle(
-              fontFamily: 'Amiri',
-              fontSize: 13,
-              fontWeight: FontWeight.w700,
-              color: AppColors.textP(context),
+          // Gold-leaf gradient on the label
+          ShaderMask(
+            shaderCallback: (bounds) =>
+                goldGradient.createShader(bounds),
+            blendMode: BlendMode.srcIn,
+            child: Text(
+              label,
+              textDirection: TextDirection.rtl,
+              textAlign: TextAlign.center,
+              style: const TextStyle(
+                fontFamily: 'Amiri',
+                fontSize: 13,
+                fontWeight: FontWeight.w700,
+                color: Colors.white, // base color for shader
+              ),
             ),
           ),
         ],
@@ -578,7 +596,10 @@ class _CategoryCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final dark = AppColors.isDark(context);
     final accentGold = AppColors.goldC(context);
+    final progressColor =
+        isCompleted ? AppColors.counterCompleted : accentGold;
 
     return GestureDetector(
       onTap: onTap,
@@ -589,7 +610,9 @@ class _CategoryCard extends StatelessWidget {
           border: Border.all(
             color: isCompleted
                 ? AppColors.counterCompleted.withValues(alpha: 0.3)
-                : AppColors.dividerC(context).withValues(alpha: 0.5),
+                : dark
+                    ? Colors.white.withValues(alpha: 0.08)
+                    : AppColors.dividerC(context).withValues(alpha: 0.5),
           ),
           boxShadow: AppColors.cardShadow(context),
         ),
@@ -598,28 +621,44 @@ class _CategoryCard extends StatelessWidget {
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              // Icon in a colored circle
-              Container(
-                width: 48,
-                height: 48,
-                decoration: BoxDecoration(
-                  shape: BoxShape.circle,
-                  color: isCompleted
-                      ? AppColors.counterCompleted.withValues(alpha: 0.1)
-                      : accentGold.withValues(alpha: 0.1),
-                  border: Border.all(
-                    color: isCompleted
-                        ? AppColors.counterCompleted.withValues(alpha: 0.3)
-                        : accentGold.withValues(alpha: 0.3),
-                    width: 1.5,
-                  ),
-                ),
-                child: Icon(
-                  isCompleted ? Icons.check : icon,
-                  size: 22,
-                  color: isCompleted
-                      ? AppColors.counterCompleted
-                      : accentGold,
+              // Icon inside a circular progress ring
+              SizedBox(
+                width: 52,
+                height: 52,
+                child: Stack(
+                  alignment: Alignment.center,
+                  children: [
+                    // Circular progress ring
+                    SizedBox(
+                      width: 52,
+                      height: 52,
+                      child: CircularProgressIndicator(
+                        value: progress,
+                        strokeWidth: 2.5,
+                        backgroundColor: AppColors.progressBg(context),
+                        valueColor:
+                            AlwaysStoppedAnimation<Color>(progressColor),
+                        strokeCap: StrokeCap.round,
+                      ),
+                    ),
+                    // Icon centered inside
+                    Container(
+                      width: 40,
+                      height: 40,
+                      decoration: BoxDecoration(
+                        shape: BoxShape.circle,
+                        color: isCompleted
+                            ? AppColors.counterCompleted
+                                .withValues(alpha: 0.1)
+                            : accentGold.withValues(alpha: 0.1),
+                      ),
+                      child: Icon(
+                        isCompleted ? Icons.check : icon,
+                        size: 20,
+                        color: progressColor,
+                      ),
+                    ),
+                  ],
                 ),
               ),
               const SizedBox(height: 10),
@@ -648,24 +687,6 @@ class _CategoryCard extends StatelessWidget {
                   fontFamily: 'Amiri',
                   fontSize: 12,
                   color: AppColors.textS(context),
-                ),
-              ),
-              const SizedBox(height: 8),
-              // Progress indicator
-              SizedBox(
-                width: 60,
-                child: ClipRRect(
-                  borderRadius: BorderRadius.circular(3),
-                  child: LinearProgressIndicator(
-                    value: progress,
-                    minHeight: 4,
-                    backgroundColor: AppColors.progressBg(context),
-                    valueColor: AlwaysStoppedAnimation<Color>(
-                      isCompleted
-                          ? AppColors.counterCompleted
-                          : accentGold,
-                    ),
-                  ),
                 ),
               ),
             ],
