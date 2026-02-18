@@ -3,6 +3,7 @@ import 'package:flutter/services.dart';
 import '../theme/app_colors.dart';
 import '../widgets/arch_header.dart';
 import '../widgets/diamond_divider.dart';
+import '../widgets/geometric_bg.dart';
 import '../data/dua_data.dart';
 
 class DuaScreen extends StatelessWidget {
@@ -16,7 +17,8 @@ class DuaScreen extends StatelessWidget {
       textDirection: TextDirection.rtl,
       child: Scaffold(
         backgroundColor: AppColors.scaffold(context),
-        body: SingleChildScrollView(
+        body: GeometricBg(
+          child: SingleChildScrollView(
           child: Column(
             children: [
               const ArchHeader(
@@ -37,6 +39,7 @@ class DuaScreen extends StatelessWidget {
               ),
             ],
           ),
+        ),
         ),
       ),
     );

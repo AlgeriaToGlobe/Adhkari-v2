@@ -7,6 +7,7 @@ import '../utils/page_transitions.dart';
 import '../widgets/accessibility_bar.dart';
 import '../widgets/dhikr_card.dart';
 import '../widgets/diamond_divider.dart';
+import '../widgets/geometric_bg.dart';
 import 'hadith_detail_screen.dart';
 
 class AdhkarListScreen extends StatefulWidget {
@@ -82,7 +83,8 @@ class _AdhkarListScreenState extends State<AdhkarListScreen> {
 
           return Scaffold(
             backgroundColor: AppColors.scaffold(context),
-            body: Stack(
+            body: GeometricBg(
+              child: Stack(
               children: [
                 // ── Main scrollable content ──
                 CustomScrollView(
@@ -310,6 +312,7 @@ class _AdhkarListScreenState extends State<AdhkarListScreen> {
                   ),
                 ),
               ],
+            ),
             ),
           );
         },

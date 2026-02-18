@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../providers/adhkar_provider.dart';
 import '../theme/app_colors.dart';
+import '../widgets/geometric_bg.dart';
 
 class TasbeehScreen extends StatefulWidget {
   const TasbeehScreen({super.key});
@@ -353,7 +354,8 @@ class _TasbeehScreenState extends State<TasbeehScreen>
           centerTitle: true,
           elevation: 0,
         ),
-        body: Consumer<AdhkarProvider>(
+        body: GeometricBg(
+          child: Consumer<AdhkarProvider>(
           builder: (context, provider, _) {
             final bool isCompleted =
                 provider.tasbeehCount >= provider.tasbeehTarget;
@@ -514,6 +516,7 @@ class _TasbeehScreenState extends State<TasbeehScreen>
               ],
             );
           },
+        ),
         ),
       ),
     );

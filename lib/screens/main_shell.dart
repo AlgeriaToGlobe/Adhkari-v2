@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../theme/app_colors.dart';
+import '../widgets/geometric_bg.dart';
 import 'home_screen.dart';
 import 'taqwim_screen.dart';
 import 'adhkar_tab_screen.dart';
@@ -34,9 +35,11 @@ class _MainShellState extends State<MainShell> {
       textDirection: TextDirection.rtl,
       child: Scaffold(
         backgroundColor: AppColors.scaffold(context),
-        body: IndexedStack(
-          index: _currentIndex,
-          children: _screens,
+        body: GeometricBg(
+          child: IndexedStack(
+            index: _currentIndex,
+            children: _screens,
+          ),
         ),
         bottomNavigationBar: Container(
           decoration: BoxDecoration(

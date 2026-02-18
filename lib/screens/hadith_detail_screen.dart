@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import '../models/dhikr.dart';
 import '../theme/app_colors.dart';
+import '../widgets/geometric_bg.dart';
 
 class HadithDetailScreen extends StatelessWidget {
   final Dhikr dhikr;
@@ -42,11 +43,12 @@ class HadithDetailScreen extends StatelessWidget {
             ),
           ],
         ),
-        body: SingleChildScrollView(
-          padding: const EdgeInsets.all(20),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
+        body: GeometricBg(
+          child: SingleChildScrollView(
+            padding: const EdgeInsets.all(20),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
               // Dhikr text
               Container(
                 padding: const EdgeInsets.all(20),
@@ -115,6 +117,7 @@ class HadithDetailScreen extends StatelessWidget {
                 ),
             ],
           ),
+        ),
         ),
       ),
     );
