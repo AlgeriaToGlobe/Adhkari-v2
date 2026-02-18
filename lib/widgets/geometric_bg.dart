@@ -4,25 +4,20 @@ import '../theme/app_colors.dart';
 /// Islamic geometric background overlay.
 ///
 /// Tiles `assets/images/geometric_pattern.png` across the entire area,
-/// then fades to the solid scaffold colour at the top so the page
-/// title sits on a clean background.
+/// with a solid-to-transparent fade at the top so titles sit on a
+/// clean background and the pattern appears further down.
 ///
 /// Place your pattern image at:  assets/images/geometric_pattern.png
-///
-/// Tune these values to taste:
-///   - [scale]      → higher = smaller tiles  (default 3.5)
-///   - [fadeHeight]  → height of the top fade zone (default 140)
-///   - opacity       → line 38 (dark) / line 38 (light)
 class GeometricBg extends StatelessWidget {
   final Widget child;
 
-  /// Height of the top fade zone (solid → transparent).
+  /// Total height of the top cover zone (solid + fade).
   final double fadeHeight;
 
   const GeometricBg({
     super.key,
     required this.child,
-    this.fadeHeight = 140,
+    this.fadeHeight = 400,
   });
 
   @override
@@ -30,27 +25,42 @@ class GeometricBg extends StatelessWidget {
     final dark = AppColors.isDark(context);
     final scaffoldColor = AppColors.scaffold(context);
 
+    final imageWidget = Image(
+      image: const ExactAssetImage(
+        'assets/images/geometric_pattern.png',
+        scale: 3.5,
+      ),
+      repeat: ImageRepeat.repeat,
+      fit: BoxFit.none,
+    );
+
     return Stack(
       children: [
         // 1. Tiled pattern image
-        //    scale: controls tile size (higher = smaller tiles).
-        //    Adjust the value if tiles are too big / too small.
         Positioned.fill(
-          child: Opacity(
-            opacity: dark ? 0.07 : 0.05,
-            child: Image(
-              image: const ExactAssetImage(
-                'assets/images/geometric_pattern.png',
-                scale: 3.5,
-              ),
-              repeat: ImageRepeat.repeat,
-              fit: BoxFit.none,
-            ),
-          ),
+          child: dark
+              // Dark mode: image as-is, gold lines on dark bg.
+              ? Opacity(opacity: 0.05, child: imageWidget)
+              // Light mode: invert so gold-on-black becomes dark-on-white.
+              //   → dark lines show as subtle marks on beige.
+              //   → white bg blends invisibly into beige.
+              : Opacity(
+                  opacity: 0.08,
+                  child: ColorFiltered(
+                    colorFilter: const ColorFilter.matrix(<double>[
+                      -1, 0, 0, 0, 255,
+                      0, -1, 0, 0, 255,
+                      0, 0, -1, 0, 255,
+                      0, 0, 0, 1, 0,
+                    ]),
+                    child: imageWidget,
+                  ),
+                ),
         ),
 
-        // 2. Top fade: solid scaffold colour → transparent.
-        //    Keeps the title area clean, pattern fades in below.
+        // 2. Top cover: fully solid → fades to transparent.
+        //    ~70 % of fadeHeight is fully solid (titles area),
+        //    last 30 % fades out so the pattern appears gradually.
         Positioned(
           top: 0,
           left: 0,
@@ -64,8 +74,10 @@ class GeometricBg extends StatelessWidget {
                   end: Alignment.bottomCenter,
                   colors: [
                     scaffoldColor,
+                    scaffoldColor,
                     scaffoldColor.withValues(alpha: 0),
                   ],
+                  stops: const [0.0, 0.7, 1.0],
                 ),
               ),
             ),
