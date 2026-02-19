@@ -40,12 +40,12 @@ class GeometricBg extends StatelessWidget {
         Positioned.fill(
           child: dark
               // Dark mode: image as-is, gold lines on dark bg.
-              ? Opacity(opacity: 0.05, child: imageWidget)
+              ? Opacity(opacity: 0.04, child: imageWidget)
               // Light mode: invert so gold-on-black becomes dark-on-white.
               //   → dark lines show as subtle marks on beige.
               //   → white bg blends invisibly into beige.
               : Opacity(
-                  opacity: 0.08,
+                  opacity: 0.04,
                   child: ColorFiltered(
                     colorFilter: const ColorFilter.matrix(<double>[
                       -1, 0, 0, 0, 255,
