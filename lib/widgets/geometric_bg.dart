@@ -37,25 +37,12 @@ class GeometricBg extends StatelessWidget {
     return Stack(
       children: [
         // 1. Tiled pattern image
+        // Same natural gold image in both modes, just different opacity.
         Positioned.fill(
-          child: dark
-              // Dark mode: image as-is, gold lines on dark bg.
-              ? Opacity(opacity: 0.05, child: imageWidget)
-              // Light mode: invert so gold-on-black becomes dark-on-white.
-              //   → dark lines show as subtle marks on beige.
-              //   → white bg blends invisibly into beige.
-              : Opacity(
-                  opacity: 0.08,
-                  child: ColorFiltered(
-                    colorFilter: const ColorFilter.matrix(<double>[
-                      -1, 0, 0, 0, 255,
-                      0, -1, 0, 0, 255,
-                      0, 0, -1, 0, 255,
-                      0, 0, 0, 1, 0,
-                    ]),
-                    child: imageWidget,
-                  ),
-                ),
+          child: Opacity(
+            opacity: dark ? 0.04 : 0.04,
+            child: imageWidget,
+          ),
         ),
 
         // 2. Top cover: fully solid → fades to transparent.
