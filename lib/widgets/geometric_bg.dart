@@ -37,6 +37,7 @@ class GeometricBg extends StatelessWidget {
     return Stack(
       children: [
         // 1. Tiled pattern image
+        // Same natural gold image in both modes, just different opacity.
         Positioned.fill(
           child: dark
               // Dark mode: image as-is, gold lines on dark bg.
