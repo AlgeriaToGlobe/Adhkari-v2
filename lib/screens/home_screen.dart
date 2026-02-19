@@ -1,3 +1,5 @@
+import 'dart:math';
+
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../providers/adhkar_provider.dart';
@@ -7,8 +9,6 @@ import '../utils/page_transitions.dart';
 import '../widgets/arch_header.dart';
 import '../widgets/diamond_divider.dart';
 import 'adhkar_list_screen.dart';
-import 'dua_screen.dart';
-import 'tasbeeh_screen.dart';
 
 class HomeScreen extends StatelessWidget {
   const HomeScreen({super.key});
@@ -266,56 +266,8 @@ class HomeScreen extends StatelessWidget {
 
                     const SizedBox(height: 24),
 
-                    // ── 5. Quick Access Row ──
-                    Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 24),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            'الوصول السريع',
-                            textDirection: TextDirection.rtl,
-                            textAlign: TextAlign.right,
-                            style: TextStyle(
-                              fontFamily: 'Amiri',
-                              fontSize: 18,
-                              fontWeight: FontWeight.w700,
-                              color: AppColors.textP(context),
-                            ),
-                          ),
-                          const SizedBox(height: 12),
-                          Row(
-                            textDirection: TextDirection.rtl,
-                            mainAxisAlignment: MainAxisAlignment.start,
-                            children: [
-                              // التسبيح button
-                              _QuickAccessButton(
-                                label: 'التسبيح',
-                                icon: Icons.touch_app_outlined,
-                                onTap: () {
-                                  Navigator.push(
-                                    context,
-                                    AppTransitions.fadeSlide(const TasbeehScreen()),
-                                  );
-                                },
-                              ),
-                              const SizedBox(width: 20),
-                              // الدعاء button
-                              _QuickAccessButton(
-                                label: 'الدعاء',
-                                icon: Icons.favorite_outline,
-                                onTap: () {
-                                  Navigator.push(
-                                    context,
-                                    AppTransitions.fadeSlide(const DuaScreen()),
-                                  );
-                                },
-                              ),
-                            ],
-                          ),
-                        ],
-                      ),
-                    ),
+                    // ── 5. Virtue of Dhikr ──
+                    const _FadlDhikrCard(),
 
                     const SizedBox(height: 24),
 
@@ -502,75 +454,137 @@ class _StreakWidget extends StatelessWidget {
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
-// Quick Access Button
+// Virtue of Dhikr Card (فضل الذكر)
 // ─────────────────────────────────────────────────────────────────────────────
 
-class _QuickAccessButton extends StatelessWidget {
-  final String label;
-  final IconData icon;
-  final VoidCallback onTap;
+class _FadlDhikrCard extends StatelessWidget {
+  const _FadlDhikrCard();
 
-  const _QuickAccessButton({
-    required this.label,
-    required this.icon,
-    required this.onTap,
-  });
+  static const List<_DhikrQuote> _quotes = [
+    _DhikrQuote(
+      text: 'فَاذْكُرُونِي أَذْكُرْكُمْ وَاشْكُرُوا لِي وَلَا تَكْفُرُونِ',
+      source: 'سورة البقرة، آية ١٥٢',
+      isQuran: true,
+    ),
+    _DhikrQuote(
+      text:
+          'وَالذَّاكِرِينَ اللَّهَ كَثِيرًا وَالذَّاكِرَاتِ أَعَدَّ اللَّهُ لَهُم مَّغْفِرَةً وَأَجْرًا عَظِيمًا',
+      source: 'سورة الأحزاب، آية ٣٥',
+      isQuran: true,
+    ),
+    _DhikrQuote(
+      text:
+          'مَثَلُ الَّذِي يَذْكُرُ رَبَّهُ وَالَّذِي لَا يَذْكُرُ رَبَّهُ مَثَلُ الحَيِّ وَالمَيِّتِ',
+      source: 'رواه البخاري',
+      isQuran: false,
+    ),
+    _DhikrQuote(
+      text: 'لَا يَزَالُ لِسَانُكَ رَطْبًا مِنْ ذِكْرِ اللَّهِ تَعَالَى',
+      source: 'رواه الترمذي وابن ماجه',
+      isQuran: false,
+    ),
+  ];
 
   @override
   Widget build(BuildContext context) {
+    final dark = AppColors.isDark(context);
     final accentGold = AppColors.goldC(context);
-    final goldGradient = AppColors.goldLeafGradient(context);
+    final quote = _quotes[Random().nextInt(_quotes.length)];
 
-    return GestureDetector(
-      onTap: onTap,
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 24),
       child: Column(
-        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Container(
-            width: 56,
-            height: 56,
-            decoration: BoxDecoration(
-              shape: BoxShape.circle,
-              color: accentGold.withValues(alpha: 0.08),
-              border: Border.all(
-                color: accentGold.withValues(alpha: 0.35),
-                width: 1.5,
-              ),
-            ),
-            // Gold-leaf gradient on the icon
-            child: ShaderMask(
-              shaderCallback: (bounds) =>
-                  goldGradient.createShader(bounds),
-              blendMode: BlendMode.srcIn,
-              child: Icon(
-                icon,
-                size: 24,
-                color: Colors.white, // base color for shader
-              ),
+          Text(
+            'فضل الذكر',
+            textDirection: TextDirection.rtl,
+            textAlign: TextAlign.right,
+            style: TextStyle(
+              fontFamily: 'Amiri',
+              fontSize: 18,
+              fontWeight: FontWeight.w700,
+              color: AppColors.textP(context),
             ),
           ),
-          const SizedBox(height: 8),
-          // Gold-leaf gradient on the label
-          ShaderMask(
-            shaderCallback: (bounds) =>
-                goldGradient.createShader(bounds),
-            blendMode: BlendMode.srcIn,
-            child: Text(
-              label,
-              textDirection: TextDirection.rtl,
-              textAlign: TextAlign.center,
-              style: const TextStyle(
-                fontFamily: 'Amiri',
-                fontSize: 13,
-                fontWeight: FontWeight.w700,
-                color: Colors.white, // base color for shader
-              ),
+          const SizedBox(height: 12),
+          Container(
+            width: double.infinity,
+            padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 18),
+            decoration: BoxDecoration(
+              color: AppColors.card(context),
+              borderRadius: BorderRadius.circular(AppColors.radiusM),
+              border: dark
+                  ? AppColors.cardBorder(context)
+                  : Border.all(
+                      color: accentGold.withValues(alpha: 0.25),
+                    ),
+              boxShadow: AppColors.cardShadow(context),
+            ),
+            child: Column(
+              children: [
+                // Decorative quotation mark
+                ShaderMask(
+                  shaderCallback: (bounds) =>
+                      AppColors.goldLeafGradient(context)
+                          .createShader(bounds),
+                  blendMode: BlendMode.srcIn,
+                  child: Icon(
+                    quote.isQuran
+                        ? Icons.menu_book_rounded
+                        : Icons.format_quote_rounded,
+                    size: 28,
+                    color: Colors.white,
+                  ),
+                ),
+                const SizedBox(height: 12),
+                // Quote text
+                Text(
+                  quote.isQuran
+                      ? '﴿ ${quote.text} ﴾'
+                      : '« ${quote.text} »',
+                  textDirection: TextDirection.rtl,
+                  textAlign: TextAlign.center,
+                  style: TextStyle(
+                    fontFamily: 'Amiri',
+                    fontSize: 16,
+                    fontWeight: FontWeight.w700,
+                    color: AppColors.textP(context),
+                    height: 1.8,
+                  ),
+                ),
+                const SizedBox(height: 10),
+                // Source
+                Text(
+                  quote.source,
+                  textDirection: TextDirection.rtl,
+                  textAlign: TextAlign.center,
+                  style: TextStyle(
+                    fontFamily: 'Amiri',
+                    fontSize: 13,
+                    color: accentGold,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+              ],
             ),
           ),
         ],
       ),
     );
   }
+}
+
+class _DhikrQuote {
+  final String text;
+  final String source;
+  final bool isQuran;
+
+  const _DhikrQuote({
+    required this.text,
+    required this.source,
+    required this.isQuran,
+  });
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
