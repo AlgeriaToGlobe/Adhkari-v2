@@ -4,6 +4,7 @@ import '../providers/adhkar_provider.dart';
 import '../models/dhikr.dart';
 import '../theme/app_colors.dart';
 import '../widgets/arch_header.dart';
+import 'dhikr_counting_screen.dart';
 
 class FreeDhikrScreen extends StatelessWidget {
   const FreeDhikrScreen({super.key});
@@ -402,32 +403,57 @@ class FreeDhikrScreen extends StatelessWidget {
 
             const SizedBox(width: 12),
 
-            // ── Center: text and count info ──
+            // ── Center: text and count info (tap to open counting screen) ──
             Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    item.text,
-                    style: TextStyle(
-                      fontFamily: 'Amiri',
-                      fontSize: 18,
-                      fontWeight: FontWeight.bold,
-                      color: AppColors.textP(context),
+              child: GestureDetector(
+                behavior: HitTestBehavior.opaque,
+                onTap: () {
+                  Navigator.of(context).push(
+                    MaterialPageRoute(
+                      builder: (_) => DhikrCountingScreen(
+                        dhikrId: item.id,
+                        dhikrText: item.text,
+                        targetCount: item.targetCount,
+                        initialCount: item.currentCount,
+                      ),
                     ),
-                    maxLines: 2,
-                    overflow: TextOverflow.ellipsis,
-                  ),
-                  const SizedBox(height: 4),
-                  Text(
-                    '${item.currentCount} من ${item.targetCount}',
-                    style: TextStyle(
-                      fontFamily: 'Amiri',
-                      fontSize: 13,
-                      color: AppColors.textS(context),
+                  );
+                },
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      item.text,
+                      style: TextStyle(
+                        fontFamily: 'Amiri',
+                        fontSize: 18,
+                        fontWeight: FontWeight.bold,
+                        color: AppColors.textP(context),
+                      ),
+                      maxLines: 2,
+                      overflow: TextOverflow.ellipsis,
                     ),
-                  ),
-                ],
+                    const SizedBox(height: 4),
+                    Row(
+                      children: [
+                        Text(
+                          '${item.currentCount} من ${item.targetCount}',
+                          style: TextStyle(
+                            fontFamily: 'Amiri',
+                            fontSize: 13,
+                            color: AppColors.textS(context),
+                          ),
+                        ),
+                        const SizedBox(width: 6),
+                        Icon(
+                          Icons.arrow_back_ios_new_rounded,
+                          size: 12,
+                          color: accentGold.withValues(alpha: 0.5),
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
               ),
             ),
 
