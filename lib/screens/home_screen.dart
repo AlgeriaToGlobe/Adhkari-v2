@@ -91,7 +91,7 @@ class HomeScreen extends StatelessWidget {
                   children: [
                     // ── 1. Arch Header ──
                     const ArchHeader(
-                      title: 'أذكاري',
+                      showLogo: true,
                       subtitle: 'حصّن يومك بذكر الله',
                     ),
 

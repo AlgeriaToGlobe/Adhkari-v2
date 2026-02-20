@@ -4,6 +4,7 @@ import '../providers/adhkar_provider.dart';
 import '../theme/app_colors.dart';
 import '../utils/page_transitions.dart';
 import '../widgets/accessibility_bar.dart';
+import '../widgets/arch_header.dart';
 import 'adhkar_list_screen.dart';
 
 /// The "الأذكار" tab – shows all adhkar categories as a scrollable list.
@@ -32,8 +33,7 @@ class _AdhkarTabScreenState extends State<AdhkarTabScreen> {
       textDirection: TextDirection.rtl,
       child: Scaffold(
         backgroundColor: Colors.transparent,
-        body: SafeArea(
-          child: Consumer<AdhkarProvider>(
+        body: Consumer<AdhkarProvider>(
             builder: (context, provider, _) {
               final allCategories = provider.categories;
               final categories = _searchQuery.isEmpty
@@ -47,35 +47,11 @@ class _AdhkarTabScreenState extends State<AdhkarTabScreen> {
               return Column(
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
-                  // ── Title ──
-                  Padding(
-                    padding: const EdgeInsets.fromLTRB(20, 20, 20, 4),
-                    child: Text(
-                      'الأذكار',
-                      textDirection: TextDirection.rtl,
-                      textAlign: TextAlign.right,
-                      style: TextStyle(
-                        fontFamily: 'Amiri',
-                        fontSize: 24,
-                        fontWeight: FontWeight.w700,
-                        color: AppColors.textP(context),
-                      ),
-                    ),
+                  // ── Header ──
+                  const ArchHeader(
+                    title: 'الأذكار',
+                    subtitle: 'اختر قسمًا لبدء القراءة',
                   ),
-                  Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 20),
-                    child: Text(
-                      'اختر قسمًا لبدء القراءة',
-                      textDirection: TextDirection.rtl,
-                      textAlign: TextAlign.right,
-                      style: TextStyle(
-                        fontFamily: 'Amiri',
-                        fontSize: 14,
-                        color: AppColors.textS(context),
-                      ),
-                    ),
-                  ),
-                  const SizedBox(height: 12),
 
                   // ── Search bar ──
                   Padding(
@@ -349,7 +325,6 @@ class _AdhkarTabScreenState extends State<AdhkarTabScreen> {
               );
             },
           ),
-        ),
       ),
     );
   }

@@ -3,6 +3,7 @@ import 'package:provider/provider.dart';
 import '../providers/adhkar_provider.dart';
 import '../models/dhikr.dart';
 import '../theme/app_colors.dart';
+import '../widgets/arch_header.dart';
 
 class FreeDhikrScreen extends StatelessWidget {
   const FreeDhikrScreen({super.key});
@@ -214,40 +215,17 @@ class FreeDhikrScreen extends StatelessWidget {
       textDirection: TextDirection.rtl,
       child: Scaffold(
         backgroundColor: Colors.transparent,
-        body: SafeArea(
-          child: Consumer<AdhkarProvider>(
+        body: Consumer<AdhkarProvider>(
             builder: (context, provider, _) {
               final items = provider.freeDhikrItems;
 
               return Column(
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
-                  // ── Title section ──
-                  Padding(
-                    padding: const EdgeInsets.fromLTRB(16, 20, 16, 8),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          'الذكر الحر',
-                          style: TextStyle(
-                            fontFamily: 'Amiri',
-                            fontSize: 24,
-                            fontWeight: FontWeight.bold,
-                            color: AppColors.textP(context),
-                          ),
-                        ),
-                        const SizedBox(height: 4),
-                        Text(
-                          'أضف أذكارك الخاصة',
-                          style: TextStyle(
-                            fontFamily: 'Amiri',
-                            fontSize: 14,
-                            color: AppColors.textS(context),
-                          ),
-                        ),
-                      ],
-                    ),
+                  // ── Header ──
+                  const ArchHeader(
+                    title: 'الذكر الحر',
+                    subtitle: 'أضف أذكارك الخاصة',
                   ),
 
                   // ── Add button ──
@@ -308,7 +286,6 @@ class FreeDhikrScreen extends StatelessWidget {
               );
             },
           ),
-        ),
       ),
     );
   }

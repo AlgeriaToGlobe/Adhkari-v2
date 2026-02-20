@@ -1,17 +1,18 @@
 import 'package:flutter/material.dart';
 import '../theme/app_colors.dart';
 
-/// Islamic arch-shaped header painted with CustomPaint.
-/// Matches the reference: dark brown background with a gold-bordered arch
-/// containing the title, and a mosque silhouette placeholder inside.
+/// Brown gradient header used across all screens for consistent styling.
+/// When [showLogo] is true, displays the app logo instead of the title text.
 class ArchHeader extends StatelessWidget {
-  final String title;
+  final String? title;
   final String? subtitle;
+  final bool showLogo;
 
   const ArchHeader({
     super.key,
-    required this.title,
+    this.title,
     this.subtitle,
+    this.showLogo = false,
   });
 
   @override
@@ -26,18 +27,25 @@ class ArchHeader extends StatelessWidget {
         child: Column(
           children: [
             const SizedBox(height: 12),
-            // Title
-            Text(
-              title,
-              textAlign: TextAlign.center,
-              style: const TextStyle(
-                fontFamily: 'Amiri',
-                fontSize: 32,
-                fontWeight: FontWeight.w700,
-                color: AppColors.gold,
-                height: 1.3,
+            if (showLogo) ...[
+              Image.asset(
+                'assets/images/logo_512.png',
+                width: 120,
+                height: 120,
               ),
-            ),
+            ] else if (title != null) ...[
+              Text(
+                title!,
+                textAlign: TextAlign.center,
+                style: const TextStyle(
+                  fontFamily: 'Amiri',
+                  fontSize: 32,
+                  fontWeight: FontWeight.w700,
+                  color: AppColors.gold,
+                  height: 1.3,
+                ),
+              ),
+            ],
             if (subtitle != null) ...[
               const SizedBox(height: 4),
               Text(
@@ -50,13 +58,6 @@ class ArchHeader extends StatelessWidget {
                 ),
               ),
             ],
-            const SizedBox(height: 12),
-            // App logo
-            Image.asset(
-              'assets/images/logo_512.png',
-              width: 100,
-              height: 100,
-            ),
             const SizedBox(height: 16),
           ],
         ),
