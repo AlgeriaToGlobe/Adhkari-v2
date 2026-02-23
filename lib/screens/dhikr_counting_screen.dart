@@ -5,11 +5,20 @@ import 'package:provider/provider.dart';
 import '../providers/adhkar_provider.dart';
 import '../theme/app_colors.dart';
 
+// ── Palette constants (shared by widget + painter) ──
+const Color _kBg = Color(0xFF0A0908);
+const Color _kGoldBright = Color(0xFFF5D77A);
+const Color _kGoldMain = Color(0xFFEBC06D);
+const Color _kGoldDeep = Color(0xFFD4A847);
+const Color _kGoldDark = Color(0xFFA88B3D);
+const Color _kGreen = Color(0xFF6B8E5B);
+
 /// Full-screen immersive dhikr counting experience.
 ///
-/// The entire screen is a tap surface. Each tap increments the counter,
-/// triggers haptic feedback, and progressively reveals a geometric
-/// mandala drawn entirely via code on a [CustomPainter] canvas.
+/// Layout (top → bottom):
+///   1. Frosted header strip — dhikr text reminder + back button
+///   2. Full-bleed mandala canvas with clear center circle for the counter
+///   3. Polished bottom bar — progress arc + count label
 class DhikrCountingScreen extends StatefulWidget {
   final String dhikrId;
   final String dhikrText;
@@ -32,22 +41,23 @@ class _DhikrCountingScreenState extends State<DhikrCountingScreen>
     with TickerProviderStateMixin {
   late int _currentCount;
 
-  // Pulse animation for the counter text
-  late AnimationController _pulseController;
-  late Animation<double> _pulseAnimation;
+  // ── Animation controllers ──
+  late AnimationController _pulseCtrl;
+  late Animation<double> _pulseAnim;
 
-  // Slow continuous rotation for the mandala
-  late AnimationController _rotationController;
+  late AnimationController _rotationCtrl;
 
-  // Glow intensity animation on tap
-  late AnimationController _glowController;
-  late Animation<double> _glowAnimation;
+  late AnimationController _glowCtrl;
+  late Animation<double> _glowAnim;
 
-  // Completion celebration
-  late AnimationController _completionController;
-  late Animation<double> _completionAnimation;
+  late AnimationController _completionCtrl;
+  late Animation<double> _completionAnim;
 
   bool _isCompleted = false;
+
+  // Radius of the clear center circle (set in build via LayoutBuilder)
+  // This is passed to the painter so it knows where to start drawing.
+  static const double _centerCircleRadius = 72.0;
 
   @override
   void initState() {
@@ -55,55 +65,45 @@ class _DhikrCountingScreenState extends State<DhikrCountingScreen>
     _currentCount = widget.initialCount;
     _isCompleted = _currentCount >= widget.targetCount;
 
-    // Pulse: quick scale bump on each tap
-    _pulseController = AnimationController(
+    _pulseCtrl = AnimationController(
       vsync: this,
       duration: const Duration(milliseconds: 200),
     );
-    _pulseAnimation = TweenSequence<double>([
-      TweenSequenceItem(tween: Tween(begin: 1.0, end: 1.18), weight: 40),
-      TweenSequenceItem(tween: Tween(begin: 1.18, end: 1.0), weight: 60),
-    ]).animate(CurvedAnimation(
-      parent: _pulseController,
-      curve: Curves.easeOut,
-    ));
+    _pulseAnim = TweenSequence<double>([
+      TweenSequenceItem(tween: Tween(begin: 1.0, end: 1.15), weight: 40),
+      TweenSequenceItem(tween: Tween(begin: 1.15, end: 1.0), weight: 60),
+    ]).animate(CurvedAnimation(parent: _pulseCtrl, curve: Curves.easeOut));
 
-    // Continuous slow rotation
-    _rotationController = AnimationController(
+    _rotationCtrl = AnimationController(
       vsync: this,
       duration: const Duration(seconds: 60),
     )..repeat();
 
-    // Glow flash on tap
-    _glowController = AnimationController(
+    _glowCtrl = AnimationController(
       vsync: this,
       duration: const Duration(milliseconds: 400),
     );
-    _glowAnimation = TweenSequence<double>([
+    _glowAnim = TweenSequence<double>([
       TweenSequenceItem(tween: Tween(begin: 0.0, end: 1.0), weight: 30),
       TweenSequenceItem(tween: Tween(begin: 1.0, end: 0.0), weight: 70),
-    ]).animate(CurvedAnimation(
-      parent: _glowController,
-      curve: Curves.easeOut,
-    ));
+    ]).animate(CurvedAnimation(parent: _glowCtrl, curve: Curves.easeOut));
 
-    // Completion burst
-    _completionController = AnimationController(
+    _completionCtrl = AnimationController(
       vsync: this,
       duration: const Duration(milliseconds: 1200),
     );
-    _completionAnimation = CurvedAnimation(
-      parent: _completionController,
+    _completionAnim = CurvedAnimation(
+      parent: _completionCtrl,
       curve: Curves.easeOutCubic,
     );
   }
 
   @override
   void dispose() {
-    _pulseController.dispose();
-    _rotationController.dispose();
-    _glowController.dispose();
-    _completionController.dispose();
+    _pulseCtrl.dispose();
+    _rotationCtrl.dispose();
+    _glowCtrl.dispose();
+    _completionCtrl.dispose();
     super.dispose();
   }
 
@@ -115,232 +115,359 @@ class _DhikrCountingScreenState extends State<DhikrCountingScreen>
   void _onTap() {
     if (_currentCount >= widget.targetCount) return;
 
-    // Haptic feedback
     HapticFeedback.mediumImpact();
-
-    // Increment via provider (persists)
     context.read<AdhkarProvider>().incrementFreeDhikrItem(widget.dhikrId);
+    setState(() => _currentCount++);
 
-    setState(() {
-      _currentCount++;
-    });
+    _pulseCtrl.forward(from: 0);
+    _glowCtrl.forward(from: 0);
 
-    // Trigger pulse
-    _pulseController.forward(from: 0);
-    _glowController.forward(from: 0);
-
-    // Check completion
     if (_currentCount >= widget.targetCount && !_isCompleted) {
       _isCompleted = true;
       HapticFeedback.heavyImpact();
-      _completionController.forward(from: 0);
+      _completionCtrl.forward(from: 0);
     }
   }
 
+  // ── Build ──────────────────────────────────────────────────────────────────
+
   @override
   Widget build(BuildContext context) {
-    // Force dark overlay style for this immersive screen
+    final topPad = MediaQuery.of(context).padding.top;
+    final botPad = MediaQuery.of(context).padding.bottom;
+    final accentColor = _isCompleted ? _kGreen : _kGoldMain;
+
     return AnnotatedRegion<SystemUiOverlayStyle>(
       value: SystemUiOverlayStyle.light.copyWith(
         statusBarColor: Colors.transparent,
-        systemNavigationBarColor: const Color(0xFF0A0908),
+        systemNavigationBarColor: _kBg,
       ),
       child: Theme(
-        data: ThemeData.dark().copyWith(
-          scaffoldBackgroundColor: const Color(0xFF0A0908),
-        ),
+        data: ThemeData.dark().copyWith(scaffoldBackgroundColor: _kBg),
         child: Scaffold(
-          backgroundColor: const Color(0xFF0A0908),
+          backgroundColor: _kBg,
           body: GestureDetector(
             behavior: HitTestBehavior.opaque,
             onTap: _onTap,
             child: Stack(
               children: [
-                // ── Mandala canvas ──
+                // ═══════════════════════════════════════════════════════════
+                // 1. MANDALA — full bleed, clear center hole
+                // ═══════════════════════════════════════════════════════════
                 Positioned.fill(
                   child: AnimatedBuilder(
                     animation: Listenable.merge([
-                      _rotationController,
-                      _glowController,
-                      _completionController,
+                      _rotationCtrl,
+                      _glowCtrl,
+                      _completionCtrl,
                     ]),
                     builder: (context, _) {
                       return CustomPaint(
                         painter: _MandalaPainter(
                           progress: _progress,
-                          rotation: _rotationController.value * 2 * pi,
-                          glowIntensity: _glowAnimation.value,
-                          completionFactor: _completionAnimation.value,
+                          rotation: _rotationCtrl.value * 2 * pi,
+                          glowIntensity: _glowAnim.value,
+                          completionFactor: _completionAnim.value,
                           isCompleted: _isCompleted,
+                          centerHoleRadius: _centerCircleRadius,
                         ),
                       );
                     },
                   ),
                 ),
 
-                // ── Central content ──
+                // ═══════════════════════════════════════════════════════════
+                // 2. CENTER COUNTER — inside a clear glowing circle
+                // ═══════════════════════════════════════════════════════════
                 Center(
-                  child: Column(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      // Dhikr text
-                      Padding(
-                        padding: const EdgeInsets.symmetric(horizontal: 40),
-                        child: Text(
-                          widget.dhikrText,
-                          textAlign: TextAlign.center,
-                          textDirection: TextDirection.rtl,
-                          style: TextStyle(
-                            fontFamily: 'Amiri',
-                            fontSize: 24,
-                            fontWeight: FontWeight.bold,
-                            color: const Color(0xFFEBC06D).withValues(alpha: 0.7),
-                            shadows: [
-                              Shadow(
-                                color: const Color(0xFFEBC06D).withValues(alpha: 0.3),
-                                blurRadius: 12,
+                  child: AnimatedBuilder(
+                    animation: _pulseAnim,
+                    builder: (context, child) {
+                      return Transform.scale(
+                        scale: _pulseAnim.value,
+                        child: child,
+                      );
+                    },
+                    child: AnimatedBuilder(
+                      animation: _glowAnim,
+                      builder: (context, _) {
+                        final glow = _glowAnim.value;
+                        return Container(
+                          width: _centerCircleRadius * 2,
+                          height: _centerCircleRadius * 2,
+                          decoration: BoxDecoration(
+                            shape: BoxShape.circle,
+                            color: _kBg,
+                            border: Border.all(
+                              color: accentColor
+                                  .withValues(alpha: 0.35 + glow * 0.4),
+                              width: 1.5,
+                            ),
+                            boxShadow: [
+                              BoxShadow(
+                                color: accentColor
+                                    .withValues(alpha: 0.10 + glow * 0.20),
+                                blurRadius: 24 + glow * 20,
+                                spreadRadius: 4 + glow * 8,
+                              ),
+                              BoxShadow(
+                                color: accentColor
+                                    .withValues(alpha: 0.05 + glow * 0.10),
+                                blurRadius: 60 + glow * 40,
+                                spreadRadius: 8 + glow * 16,
                               ),
                             ],
                           ),
-                        ),
-                      ),
-                      const SizedBox(height: 24),
+                          child: Center(
+                            child: Column(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                Text(
+                                  '$_currentCount',
+                                  style: TextStyle(
+                                    fontFamily: 'Amiri',
+                                    fontSize: _currentCount >= 1000 ? 40 : 52,
+                                    fontWeight: FontWeight.bold,
+                                    color: _isCompleted
+                                        ? _kGreen
+                                        : _kGoldBright,
+                                    height: 1.1,
+                                  ),
+                                ),
+                                Text(
+                                  '/ ${widget.targetCount}',
+                                  style: TextStyle(
+                                    fontFamily: 'Amiri',
+                                    fontSize: 14,
+                                    color: Colors.white
+                                        .withValues(alpha: 0.3),
+                                    height: 1.0,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        );
+                      },
+                    ),
+                  ),
+                ),
 
-                      // Pulsing count
-                      AnimatedBuilder(
-                        animation: _pulseAnimation,
-                        builder: (context, child) {
-                          return Transform.scale(
-                            scale: _pulseAnimation.value,
-                            child: child,
-                          );
-                        },
-                        child: AnimatedBuilder(
-                          animation: _glowAnimation,
-                          builder: (context, _) {
-                            final glowAlpha = 0.4 + _glowAnimation.value * 0.6;
-                            return Text(
-                              '$_currentCount',
-                              style: TextStyle(
-                                fontFamily: 'Amiri',
-                                fontSize: 96,
-                                fontWeight: FontWeight.bold,
-                                color: _isCompleted
-                                    ? const Color(0xFF6B8E5B)
-                                    : const Color(0xFFF5D77A),
-                                shadows: [
-                                  Shadow(
-                                    color: (_isCompleted
-                                            ? const Color(0xFF6B8E5B)
-                                            : const Color(0xFFEBC06D))
-                                        .withValues(alpha: glowAlpha),
-                                    blurRadius: 24 + _glowAnimation.value * 16,
-                                  ),
-                                  Shadow(
-                                    color: (_isCompleted
-                                            ? const Color(0xFF6B8E5B)
-                                            : const Color(0xFFEBC06D))
-                                        .withValues(alpha: glowAlpha * 0.5),
-                                    blurRadius: 48 + _glowAnimation.value * 32,
-                                  ),
-                                ],
+                // ═══════════════════════════════════════════════════════════
+                // 3. TOP HEADER — dhikr reminder + back button
+                // ═══════════════════════════════════════════════════════════
+                Positioned(
+                  top: 0,
+                  left: 0,
+                  right: 0,
+                  child: Container(
+                    padding: EdgeInsets.only(
+                      top: topPad + 8,
+                      bottom: 14,
+                      left: 16,
+                      right: 16,
+                    ),
+                    decoration: BoxDecoration(
+                      gradient: LinearGradient(
+                        begin: Alignment.topCenter,
+                        end: Alignment.bottomCenter,
+                        colors: [
+                          _kBg,
+                          _kBg.withValues(alpha: 0.95),
+                          _kBg.withValues(alpha: 0.0),
+                        ],
+                        stops: const [0.0, 0.65, 1.0],
+                      ),
+                    ),
+                    child: Row(
+                      children: [
+                        // Back
+                        GestureDetector(
+                          onTap: () => Navigator.of(context).pop(),
+                          child: Container(
+                            width: 36,
+                            height: 36,
+                            decoration: BoxDecoration(
+                              shape: BoxShape.circle,
+                              color: Colors.white.withValues(alpha: 0.08),
+                              border: Border.all(
+                                color: Colors.white.withValues(alpha: 0.06),
                               ),
-                            );
-                          },
-                        ),
-                      ),
-
-                      const SizedBox(height: 8),
-
-                      // Target label
-                      Text(
-                        'من ${widget.targetCount}',
-                        textDirection: TextDirection.rtl,
-                        style: TextStyle(
-                          fontFamily: 'Amiri',
-                          fontSize: 18,
-                          color: const Color(0xFFB5A898).withValues(alpha: 0.6),
-                        ),
-                      ),
-
-                      const SizedBox(height: 32),
-
-                      // Progress bar
-                      Padding(
-                        padding: const EdgeInsets.symmetric(horizontal: 80),
-                        child: ClipRRect(
-                          borderRadius: BorderRadius.circular(4),
-                          child: LinearProgressIndicator(
-                            value: _progress,
-                            minHeight: 3,
-                            backgroundColor:
-                                Colors.white.withValues(alpha: 0.08),
-                            valueColor: AlwaysStoppedAnimation<Color>(
-                              _isCompleted
-                                  ? const Color(0xFF6B8E5B)
-                                  : const Color(0xFFEBC06D).withValues(alpha: 0.8),
+                            ),
+                            child: Icon(
+                              Icons.arrow_forward_rounded,
+                              color: Colors.white.withValues(alpha: 0.6),
+                              size: 20,
                             ),
                           ),
                         ),
-                      ),
-                    ],
-                  ),
-                ),
+                        const SizedBox(width: 12),
 
-                // ── Back button ──
-                Positioned(
-                  top: MediaQuery.of(context).padding.top + 8,
-                  right: 8,
-                  child: IconButton(
-                    icon: Icon(
-                      Icons.arrow_forward_rounded,
-                      color: Colors.white.withValues(alpha: 0.5),
-                      size: 28,
+                        // Dhikr text
+                        Expanded(
+                          child: Text(
+                            widget.dhikrText,
+                            textDirection: TextDirection.rtl,
+                            textAlign: TextAlign.center,
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                            style: TextStyle(
+                              fontFamily: 'Amiri',
+                              fontSize: 18,
+                              fontWeight: FontWeight.bold,
+                              color: _kGoldMain.withValues(alpha: 0.85),
+                              shadows: [
+                                Shadow(
+                                  color: _kGoldMain.withValues(alpha: 0.4),
+                                  blurRadius: 16,
+                                ),
+                              ],
+                            ),
+                          ),
+                        ),
+
+                        const SizedBox(width: 48), // balance the back button
+                      ],
                     ),
-                    onPressed: () => Navigator.of(context).pop(),
                   ),
                 ),
 
-                // ── Completion overlay ──
+                // ═══════════════════════════════════════════════════════════
+                // 4. BOTTOM BAR — progress + hint
+                // ═══════════════════════════════════════════════════════════
+                Positioned(
+                  bottom: 0,
+                  left: 0,
+                  right: 0,
+                  child: Container(
+                    padding: EdgeInsets.only(
+                      top: 20,
+                      bottom: botPad + 16,
+                      left: 32,
+                      right: 32,
+                    ),
+                    decoration: BoxDecoration(
+                      gradient: LinearGradient(
+                        begin: Alignment.bottomCenter,
+                        end: Alignment.topCenter,
+                        colors: [
+                          _kBg,
+                          _kBg.withValues(alpha: 0.95),
+                          _kBg.withValues(alpha: 0.0),
+                        ],
+                        stops: const [0.0, 0.65, 1.0],
+                      ),
+                    ),
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        // Progress bar
+                        Container(
+                          height: 6,
+                          decoration: BoxDecoration(
+                            borderRadius: BorderRadius.circular(3),
+                            color: Colors.white.withValues(alpha: 0.06),
+                          ),
+                          child: LayoutBuilder(
+                            builder: (context, constraints) {
+                              return Stack(
+                                children: [
+                                  AnimatedContainer(
+                                    duration: const Duration(milliseconds: 200),
+                                    curve: Curves.easeOut,
+                                    width: constraints.maxWidth * _progress,
+                                    decoration: BoxDecoration(
+                                      borderRadius: BorderRadius.circular(3),
+                                      gradient: LinearGradient(
+                                        colors: _isCompleted
+                                            ? [_kGreen, _kGreen]
+                                            : [_kGoldDark, _kGoldMain, _kGoldBright],
+                                      ),
+                                      boxShadow: [
+                                        BoxShadow(
+                                          color: accentColor
+                                              .withValues(alpha: 0.4),
+                                          blurRadius: 8,
+                                          offset: const Offset(0, 1),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                ],
+                              );
+                            },
+                          ),
+                        ),
+
+                        const SizedBox(height: 12),
+
+                        // Bottom labels
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            // Percentage
+                            Text(
+                              '${(_progress * 100).toInt()}%',
+                              style: TextStyle(
+                                fontFamily: 'Amiri',
+                                fontSize: 13,
+                                fontWeight: FontWeight.bold,
+                                color: accentColor.withValues(alpha: 0.7),
+                              ),
+                            ),
+                            // Hint / status
+                            Text(
+                              _isCompleted
+                                  ? 'اكتمل الذكر ❤'
+                                  : 'اضغط في أي مكان للتسبيح',
+                              textDirection: TextDirection.rtl,
+                              style: TextStyle(
+                                fontFamily: 'Amiri',
+                                fontSize: 13,
+                                color: _isCompleted
+                                    ? _kGreen.withValues(alpha: 0.7)
+                                    : Colors.white.withValues(alpha: 0.25),
+                              ),
+                            ),
+                            // Remaining
+                            Text(
+                              _isCompleted
+                                  ? widget.targetCount.toString()
+                                  : '${widget.targetCount - _currentCount}',
+                              textDirection: TextDirection.rtl,
+                              style: TextStyle(
+                                fontFamily: 'Amiri',
+                                fontSize: 13,
+                                color: Colors.white.withValues(alpha: 0.3),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+
+                // ═══════════════════════════════════════════════════════════
+                // 5. COMPLETION FLASH
+                // ═══════════════════════════════════════════════════════════
                 if (_isCompleted)
                   AnimatedBuilder(
-                    animation: _completionAnimation,
+                    animation: _completionAnim,
                     builder: (context, _) {
-                      final opacity =
-                          (_completionAnimation.value * 2).clamp(0.0, 1.0) *
-                              (1.0 -
-                                  ((_completionAnimation.value - 0.5) * 2)
-                                      .clamp(0.0, 1.0));
+                      final t = _completionAnim.value;
+                      final opacity = (t * 2).clamp(0.0, 1.0) *
+                          (1.0 - ((t - 0.5) * 2).clamp(0.0, 1.0));
                       if (opacity <= 0.01) return const SizedBox.shrink();
                       return Positioned.fill(
                         child: IgnorePointer(
                           child: Container(
-                            color: const Color(0xFF6B8E5B)
-                                .withValues(alpha: opacity * 0.15),
+                            color: _kGreen.withValues(alpha: opacity * 0.12),
                           ),
                         ),
                       );
                     },
                   ),
-
-                // ── Tap hint at bottom ──
-                Positioned(
-                  bottom: MediaQuery.of(context).padding.bottom + 24,
-                  left: 0,
-                  right: 0,
-                  child: Text(
-                    _isCompleted ? 'اكتمل الذكر' : 'اضغط في أي مكان للتسبيح',
-                    textDirection: TextDirection.rtl,
-                    textAlign: TextAlign.center,
-                    style: TextStyle(
-                      fontFamily: 'Amiri',
-                      fontSize: 14,
-                      color: _isCompleted
-                          ? const Color(0xFF6B8E5B).withValues(alpha: 0.7)
-                          : Colors.white.withValues(alpha: 0.25),
-                    ),
-                  ),
-                ),
               ],
             ),
           ),
@@ -350,16 +477,17 @@ class _DhikrCountingScreenState extends State<DhikrCountingScreen>
   }
 }
 
-// ─────────────────────────────────────────────────────────────────────────────
-// Mandala CustomPainter — purely mathematical, no external assets
-// ─────────────────────────────────────────────────────────────────────────────
+// ═══════════════════════════════════════════════════════════════════════════════
+// MANDALA PAINTER — radiates outward from the center circle
+// ═══════════════════════════════════════════════════════════════════════════════
 
 class _MandalaPainter extends CustomPainter {
-  final double progress; // 0.0 → 1.0
-  final double rotation; // continuous rotation in radians
-  final double glowIntensity; // 0.0 → 1.0, flash on tap
-  final double completionFactor; // 0.0 → 1.0, celebration
+  final double progress;
+  final double rotation;
+  final double glowIntensity;
+  final double completionFactor;
   final bool isCompleted;
+  final double centerHoleRadius;
 
   _MandalaPainter({
     required this.progress,
@@ -367,141 +495,139 @@ class _MandalaPainter extends CustomPainter {
     required this.glowIntensity,
     required this.completionFactor,
     required this.isCompleted,
+    required this.centerHoleRadius,
   });
-
-  // ── Gold/amber palette ──
-  static const Color _goldBright = Color(0xFFF5D77A);
-  static const Color _goldMain = Color(0xFFEBC06D);
-  static const Color _goldDeep = Color(0xFFD4A847);
-  static const Color _goldDark = Color(0xFFA88B3D);
-  static const Color _completedGreen = Color(0xFF6B8E5B);
 
   @override
   void paint(Canvas canvas, Size size) {
     final cx = size.width / 2;
     final cy = size.height / 2;
-    final maxRadius = min(cx, cy) * 0.92;
+    // maxRadius = distance from center to the nearest edge (with margin)
+    final maxRadius = min(cx, cy) * 0.95;
+
+    // The clear zone where the counter sits — mandala starts OUTSIDE this
+    final holeR = centerHoleRadius + 10; // small gap outside the circle border
+
+    // The mandala fills the band: holeR → maxRadius
+    // All layer radii are expressed as fractions of this band.
+    final bandWidth = maxRadius - holeR;
+    if (bandWidth <= 0) return;
 
     canvas.save();
     canvas.translate(cx, cy);
 
-    // Effective progress controls how much of the mandala is revealed
     final p = progress;
 
-    // ── Layer 1: Central dot (always visible once started) ──
-    if (p > 0) {
-      _drawCenterDot(canvas, maxRadius, p);
-    }
+    // ── Glowing ring at the origin circle boundary ──
+    _drawOriginRing(canvas, holeR, p);
 
-    // ── Layer 2: Inner ring of petals (0% → 15%) ──
+    // ── Layer 1: First petal ring hugging the circle (0% → 12%) ──
     if (p > 0.0) {
-      final layerP = (p / 0.15).clamp(0.0, 1.0);
-      _drawPetalRing(
-        canvas,
-        petalCount: 8,
-        innerRadius: maxRadius * 0.06,
-        outerRadius: maxRadius * 0.18,
-        petalWidth: 0.28,
-        rotationOffset: rotation * 0.1,
-        layerProgress: layerP,
-        color: _goldBright,
-        strokeWidth: 1.5,
-      );
+      final lp = (p / 0.12).clamp(0.0, 1.0);
+      _drawPetalRing(canvas,
+          petalCount: 8,
+          innerR: holeR,
+          outerR: holeR + bandWidth * 0.10,
+          petalWidth: 0.32,
+          rotOff: rotation * 0.10,
+          lp: lp,
+          color: _kGoldBright,
+          sw: 1.5);
     }
 
-    // ── Layer 3: First geometric ring (10% → 25%) ──
+    // ── Layer 2: Geometric diamond ring (8% → 22%) ──
+    if (p > 0.08) {
+      final lp = ((p - 0.08) / 0.14).clamp(0.0, 1.0);
+      _drawGeometricRing(canvas, holeR + bandWidth * 0.10, 12, lp,
+          rotation * -0.05, _kGoldMain, 1.2);
+    }
+
+    // ── Layer 3: Second petal ring (18% → 36%) ──
+    if (p > 0.18) {
+      final lp = ((p - 0.18) / 0.18).clamp(0.0, 1.0);
+      _drawPetalRing(canvas,
+          petalCount: 12,
+          innerR: holeR + bandWidth * 0.10,
+          outerR: holeR + bandWidth * 0.26,
+          petalWidth: 0.24,
+          rotOff: rotation * 0.07 + pi / 12,
+          lp: lp,
+          color: _kGoldMain,
+          sw: 1.3);
+    }
+
+    // ── Layer 4: Diamond lattice (30% → 48%) ──
+    if (p > 0.30) {
+      final lp = ((p - 0.30) / 0.18).clamp(0.0, 1.0);
+      _drawDiamondRing(canvas, holeR + bandWidth * 0.24, holeR + bandWidth * 0.36,
+          16, lp, rotation * 0.04, _kGoldDeep, 1.0);
+    }
+
+    // ── Layer 5: Third petal ring (42% → 62%) ──
+    if (p > 0.42) {
+      final lp = ((p - 0.42) / 0.20).clamp(0.0, 1.0);
+      _drawPetalRing(canvas,
+          petalCount: 16,
+          innerR: holeR + bandWidth * 0.34,
+          outerR: holeR + bandWidth * 0.52,
+          petalWidth: 0.20,
+          rotOff: rotation * -0.06 + pi / 16,
+          lp: lp,
+          color: _kGoldDeep,
+          sw: 1.2);
+    }
+
+    // ── Layer 6: Star burst (56% → 74%) ──
+    if (p > 0.56) {
+      final lp = ((p - 0.56) / 0.18).clamp(0.0, 1.0);
+      _drawStarBurst(canvas, holeR + bandWidth * 0.50, holeR + bandWidth * 0.66,
+          24, lp, rotation * 0.03, _kGoldDark, 1.0);
+    }
+
+    // ── Layer 7: Outer filigree petals (68% → 86%) ──
+    if (p > 0.68) {
+      final lp = ((p - 0.68) / 0.18).clamp(0.0, 1.0);
+      _drawPetalRing(canvas,
+          petalCount: 24,
+          innerR: holeR + bandWidth * 0.62,
+          outerR: holeR + bandWidth * 0.80,
+          petalWidth: 0.16,
+          rotOff: rotation * 0.05 + pi / 24,
+          lp: lp,
+          color: _kGoldDark,
+          sw: 1.0);
+    }
+
+    // ── Layer 8: Outer geometric ring (78% → 92%) ──
+    if (p > 0.78) {
+      final lp = ((p - 0.78) / 0.14).clamp(0.0, 1.0);
+      _drawGeometricRing(canvas, holeR + bandWidth * 0.80, 20, lp,
+          rotation * -0.03, _kGoldMain, 0.9);
+    }
+
+    // ── Layer 9: Final scalloped border (88% → 100%) ──
+    if (p > 0.88) {
+      final lp = ((p - 0.88) / 0.12).clamp(0.0, 1.0);
+      _drawScallopedBorder(canvas, holeR + bandWidth * 0.88,
+          holeR + bandWidth * 0.96, 32, lp, rotation * -0.02, _kGoldBright, 0.8);
+    }
+
+    // ── Connecting arcs ──
     if (p > 0.10) {
-      final layerP = ((p - 0.10) / 0.15).clamp(0.0, 1.0);
-      _drawGeometricRing(canvas, maxRadius * 0.20, 12, layerP,
-          rotation * -0.05, _goldMain, 1.2);
+      _drawConnectingArcs(canvas, holeR, bandWidth, p);
     }
 
-    // ── Layer 4: Second petal ring (20% → 40%) ──
-    if (p > 0.20) {
-      final layerP = ((p - 0.20) / 0.20).clamp(0.0, 1.0);
-      _drawPetalRing(
-        canvas,
-        petalCount: 12,
-        innerRadius: maxRadius * 0.18,
-        outerRadius: maxRadius * 0.34,
-        petalWidth: 0.22,
-        rotationOffset: rotation * 0.07 + pi / 12,
-        layerProgress: layerP,
-        color: _goldMain,
-        strokeWidth: 1.3,
-      );
-    }
-
-    // ── Layer 5: Diamond lattice ring (35% → 55%) ──
-    if (p > 0.35) {
-      final layerP = ((p - 0.35) / 0.20).clamp(0.0, 1.0);
-      _drawDiamondRing(canvas, maxRadius * 0.30, maxRadius * 0.42, 16, layerP,
-          rotation * 0.04, _goldDeep, 1.0);
-    }
-
-    // ── Layer 6: Outer large petals (45% → 70%) ──
-    if (p > 0.45) {
-      final layerP = ((p - 0.45) / 0.25).clamp(0.0, 1.0);
-      _drawPetalRing(
-        canvas,
-        petalCount: 16,
-        innerRadius: maxRadius * 0.38,
-        outerRadius: maxRadius * 0.58,
-        petalWidth: 0.18,
-        rotationOffset: rotation * -0.06 + pi / 16,
-        layerProgress: layerP,
-        color: _goldDeep,
-        strokeWidth: 1.2,
-      );
-    }
-
-    // ── Layer 7: Star burst ring (60% → 80%) ──
-    if (p > 0.60) {
-      final layerP = ((p - 0.60) / 0.20).clamp(0.0, 1.0);
-      _drawStarBurst(canvas, maxRadius * 0.55, maxRadius * 0.72, 24, layerP,
-          rotation * 0.03, _goldDark, 1.0);
-    }
-
-    // ── Layer 8: Outermost filigree petals (70% → 90%) ──
-    if (p > 0.70) {
-      final layerP = ((p - 0.70) / 0.20).clamp(0.0, 1.0);
-      _drawPetalRing(
-        canvas,
-        petalCount: 24,
-        innerRadius: maxRadius * 0.65,
-        outerRadius: maxRadius * 0.85,
-        petalWidth: 0.14,
-        rotationOffset: rotation * 0.05 + pi / 24,
-        layerProgress: layerP,
-        color: _goldDark,
-        strokeWidth: 0.9,
-      );
-    }
-
-    // ── Layer 9: Final outer border ring (85% → 100%) ──
-    if (p > 0.85) {
-      final layerP = ((p - 0.85) / 0.15).clamp(0.0, 1.0);
-      _drawOuterBorderRing(canvas, maxRadius * 0.88, maxRadius * 0.92, 32,
-          layerP, rotation * -0.02, _goldBright, 0.8);
-    }
-
-    // ── Connecting arcs between layers ──
-    if (p > 0.15) {
-      _drawConnectingArcs(canvas, maxRadius, p);
-    }
-
-    // ── Tap glow flash ──
+    // ── Tap glow ripple ──
     if (glowIntensity > 0.01) {
+      final glowColor = isCompleted ? _kGreen : _kGoldBright;
       final glowPaint = Paint()
         ..shader = RadialGradient(
           colors: [
-            (isCompleted ? _completedGreen : _goldBright)
-                .withValues(alpha: glowIntensity * 0.15),
-            (isCompleted ? _completedGreen : _goldMain)
-                .withValues(alpha: glowIntensity * 0.05),
+            glowColor.withValues(alpha: glowIntensity * 0.12),
+            glowColor.withValues(alpha: glowIntensity * 0.04),
             Colors.transparent,
           ],
-          stops: const [0.0, 0.4, 1.0],
+          stops: const [0.0, 0.5, 1.0],
         ).createShader(Rect.fromCircle(center: Offset.zero, radius: maxRadius));
       canvas.drawCircle(Offset.zero, maxRadius, glowPaint);
     }
@@ -509,324 +635,271 @@ class _MandalaPainter extends CustomPainter {
     canvas.restore();
   }
 
-  /// Glowing central dot with radiating circle
-  void _drawCenterDot(Canvas canvas, double maxR, double p) {
-    final radius = maxR * 0.04 * min(p * 5, 1.0);
-    final paint = Paint()
-      ..color = _goldBright.withValues(alpha: 0.8 * min(p * 5, 1.0))
-      ..style = PaintingStyle.fill;
-    canvas.drawCircle(Offset.zero, radius, paint);
+  // ── Origin ring: the golden border that hugs the counter circle ──
+  void _drawOriginRing(Canvas canvas, double holeR, double p) {
+    if (p <= 0) return;
+    final alpha = (p * 5).clamp(0.0, 1.0);
 
-    // Radiating halo
-    final haloPaint = Paint()
-      ..color = _goldMain.withValues(alpha: 0.15 * min(p * 3, 1.0))
-      ..style = PaintingStyle.fill;
-    canvas.drawCircle(Offset.zero, radius * 3, haloPaint);
+    // Outer glow
+    final glowPaint = Paint()
+      ..color = _kGoldMain.withValues(alpha: 0.08 * alpha)
+      ..style = PaintingStyle.fill
+      ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 20);
+    canvas.drawCircle(Offset.zero, holeR + 6, glowPaint);
 
-    // Inner ring
-    if (p > 0.02) {
-      final ringPaint = Paint()
-        ..color = _goldMain.withValues(alpha: 0.5 * min(p * 4, 1.0))
-        ..style = PaintingStyle.stroke
-        ..strokeWidth = 1.0;
-      canvas.drawCircle(Offset.zero, maxR * 0.06 * min(p * 4, 1.0), ringPaint);
-    }
-  }
-
-  /// Draws a ring of pointed petals using quadratic Bézier curves in polar form
-  void _drawPetalRing(
-    Canvas canvas, {
-    required int petalCount,
-    required double innerRadius,
-    required double outerRadius,
-    required double petalWidth,
-    required double rotationOffset,
-    required double layerProgress,
-    required Color color,
-    required double strokeWidth,
-  }) {
-    final paint = Paint()
-      ..color = color.withValues(alpha: 0.7 * layerProgress)
+    // Thin gold ring
+    final ringPaint = Paint()
+      ..color = _kGoldMain.withValues(alpha: 0.4 * alpha)
       ..style = PaintingStyle.stroke
-      ..strokeWidth = strokeWidth
-      ..strokeCap = StrokeCap.round;
+      ..strokeWidth = 1.0;
+    canvas.drawCircle(Offset.zero, holeR, ringPaint);
 
-    final fillPaint = Paint()
-      ..color = color.withValues(alpha: 0.05 * layerProgress)
-      ..style = PaintingStyle.fill;
-
-    final angleStep = 2 * pi / petalCount;
-    final petalsToShow = (petalCount * layerProgress).ceil();
-
-    for (int i = 0; i < petalsToShow; i++) {
-      final petalProgress =
-          i < petalsToShow - 1 ? 1.0 : (layerProgress * petalCount - i).clamp(0.0, 1.0);
-
-      final angle = i * angleStep + rotationOffset;
-      final effectiveOuter =
-          innerRadius + (outerRadius - innerRadius) * petalProgress;
-
-      final path = _buildPetalPath(
-        angle: angle,
-        innerRadius: innerRadius,
-        outerRadius: effectiveOuter,
-        width: petalWidth,
-      );
-
-      canvas.drawPath(path, fillPaint);
-      canvas.drawPath(path, paint);
+    // Slightly larger faint ring
+    if (p > 0.05) {
+      final outerAlpha = ((p - 0.05) * 4).clamp(0.0, 1.0);
+      final outerPaint = Paint()
+        ..color = _kGoldDeep.withValues(alpha: 0.18 * outerAlpha)
+        ..style = PaintingStyle.stroke
+        ..strokeWidth = 0.5;
+      canvas.drawCircle(Offset.zero, holeR + 4, outerPaint);
     }
   }
 
-  /// Builds a single petal as a closed Path using cubic Béziers
-  Path _buildPetalPath({
-    required double angle,
-    required double innerRadius,
-    required double outerRadius,
-    required double width,
+  // ── Petal ring ──
+  void _drawPetalRing(Canvas canvas, {
+    required int petalCount,
+    required double innerR,
+    required double outerR,
+    required double petalWidth,
+    required double rotOff,
+    required double lp,
+    required Color color,
+    required double sw,
   }) {
-    final path = Path();
+    final strokePaint = Paint()
+      ..color = color.withValues(alpha: 0.7 * lp)
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = sw
+      ..strokeCap = StrokeCap.round;
+    final fillPaint = Paint()
+      ..color = color.withValues(alpha: 0.05 * lp)
+      ..style = PaintingStyle.fill;
 
-    // Inner point (base of petal)
-    final ix = cos(angle) * innerRadius;
-    final iy = sin(angle) * innerRadius;
+    final step = 2 * pi / petalCount;
+    final show = (petalCount * lp).ceil();
 
-    // Outer point (tip of petal)
-    final ox = cos(angle) * outerRadius;
-    final oy = sin(angle) * outerRadius;
+    for (int i = 0; i < show; i++) {
+      final pp = i < show - 1 ? 1.0 : (lp * petalCount - i).clamp(0.0, 1.0);
+      final angle = i * step + rotOff;
+      final effOuter = innerR + (outerR - innerR) * pp;
 
-    // Width control points perpendicular to the radial direction
-    final perpAngle = angle + pi / 2;
-    final midRadius = (innerRadius + outerRadius) / 2;
-    final widthOffset = (outerRadius - innerRadius) * width;
-
-    // Left control point
-    final lx = cos(angle) * midRadius + cos(perpAngle) * widthOffset;
-    final ly = sin(angle) * midRadius + sin(perpAngle) * widthOffset;
-
-    // Right control point
-    final rx = cos(angle) * midRadius - cos(perpAngle) * widthOffset;
-    final ry = sin(angle) * midRadius - sin(perpAngle) * widthOffset;
-
-    path.moveTo(ix, iy);
-    path.quadraticBezierTo(lx, ly, ox, oy);
-    path.quadraticBezierTo(rx, ry, ix, iy);
-    path.close();
-
-    return path;
+      final path = _petalPath(angle, innerR, effOuter, petalWidth);
+      canvas.drawPath(path, fillPaint);
+      canvas.drawPath(path, strokePaint);
+    }
   }
 
-  /// Geometric ring: small polygons arranged in a circle
+  Path _petalPath(double angle, double innerR, double outerR, double w) {
+    final ix = cos(angle) * innerR;
+    final iy = sin(angle) * innerR;
+    final ox = cos(angle) * outerR;
+    final oy = sin(angle) * outerR;
+
+    final perp = angle + pi / 2;
+    final midR = (innerR + outerR) / 2;
+    final wo = (outerR - innerR) * w;
+
+    final lx = cos(angle) * midR + cos(perp) * wo;
+    final ly = sin(angle) * midR + sin(perp) * wo;
+    final rx = cos(angle) * midR - cos(perp) * wo;
+    final ry = sin(angle) * midR - sin(perp) * wo;
+
+    return Path()
+      ..moveTo(ix, iy)
+      ..quadraticBezierTo(lx, ly, ox, oy)
+      ..quadraticBezierTo(rx, ry, ix, iy)
+      ..close();
+  }
+
+  // ── Geometric ring (small diamonds on a circle) ──
   void _drawGeometricRing(Canvas canvas, double radius, int count,
-      double layerProgress, double rotOffset, Color color, double sw) {
+      double lp, double rotOff, Color color, double sw) {
     final paint = Paint()
-      ..color = color.withValues(alpha: 0.5 * layerProgress)
+      ..color = color.withValues(alpha: 0.5 * lp)
       ..style = PaintingStyle.stroke
       ..strokeWidth = sw;
 
-    final angleStep = 2 * pi / count;
-    final itemsToShow = (count * layerProgress).ceil();
-    final smallR = radius * 0.12;
+    final step = 2 * pi / count;
+    final show = (count * lp).ceil();
+    final sr = radius * 0.10;
 
-    for (int i = 0; i < itemsToShow; i++) {
-      final angle = i * angleStep + rotOffset;
-      final cx = cos(angle) * radius;
-      final cy = sin(angle) * radius;
+    for (int i = 0; i < show; i++) {
+      final a = i * step + rotOff;
+      final dx = cos(a) * radius;
+      final dy = sin(a) * radius;
 
-      // Draw small diamond at each point
-      final path = Path();
-      path.moveTo(cx + cos(angle) * smallR, cy + sin(angle) * smallR);
-      path.lineTo(
-          cx + cos(angle + pi / 2) * smallR * 0.5,
-          cy + sin(angle + pi / 2) * smallR * 0.5);
-      path.lineTo(cx - cos(angle) * smallR, cy - sin(angle) * smallR);
-      path.lineTo(
-          cx - cos(angle + pi / 2) * smallR * 0.5,
-          cy - sin(angle + pi / 2) * smallR * 0.5);
-      path.close();
-
+      final path = Path()
+        ..moveTo(dx + cos(a) * sr, dy + sin(a) * sr)
+        ..lineTo(dx + cos(a + pi / 2) * sr * 0.5,
+            dy + sin(a + pi / 2) * sr * 0.5)
+        ..lineTo(dx - cos(a) * sr, dy - sin(a) * sr)
+        ..lineTo(dx - cos(a + pi / 2) * sr * 0.5,
+            dy - sin(a + pi / 2) * sr * 0.5)
+        ..close();
       canvas.drawPath(path, paint);
     }
 
-    // Connecting circle
-    if (layerProgress > 0.5) {
-      final circlePaint = Paint()
-        ..color = color.withValues(alpha: 0.2 * ((layerProgress - 0.5) * 2))
+    if (lp > 0.5) {
+      final cp = Paint()
+        ..color = color.withValues(alpha: 0.18 * ((lp - 0.5) * 2))
         ..style = PaintingStyle.stroke
-        ..strokeWidth = sw * 0.6;
-      canvas.drawCircle(Offset.zero, radius, circlePaint);
+        ..strokeWidth = sw * 0.5;
+      canvas.drawCircle(Offset.zero, radius, cp);
     }
   }
 
-  /// Diamond lattice between two radii
-  void _drawDiamondRing(Canvas canvas, double innerR, double outerR, int count,
-      double layerProgress, double rotOffset, Color color, double sw) {
+  // ── Diamond lattice ──
+  void _drawDiamondRing(Canvas canvas, double innerR, double outerR,
+      int count, double lp, double rotOff, Color color, double sw) {
     final paint = Paint()
-      ..color = color.withValues(alpha: 0.45 * layerProgress)
+      ..color = color.withValues(alpha: 0.45 * lp)
       ..style = PaintingStyle.stroke
       ..strokeWidth = sw
       ..strokeCap = StrokeCap.round;
 
-    final angleStep = 2 * pi / count;
-    final itemsToShow = (count * layerProgress).ceil();
+    final step = 2 * pi / count;
+    final show = (count * lp).ceil();
 
-    for (int i = 0; i < itemsToShow; i++) {
-      final a = i * angleStep + rotOffset;
-      final aNext = (i + 1) * angleStep + rotOffset;
-      final aMid = (a + aNext) / 2;
-
-      // Inner point
-      final ix = cos(a) * innerR;
-      final iy = sin(a) * innerR;
-
-      // Outer point (between this and next)
-      final ox = cos(aMid) * outerR;
-      final oy = sin(aMid) * outerR;
-
-      // Next inner point
-      final nx = cos(aNext) * innerR;
-      final ny = sin(aNext) * innerR;
+    for (int i = 0; i < show; i++) {
+      final a = i * step + rotOff;
+      final aN = (i + 1) * step + rotOff;
+      final aM = (a + aN) / 2;
 
       final path = Path()
-        ..moveTo(ix, iy)
-        ..lineTo(ox, oy)
-        ..lineTo(nx, ny);
-
+        ..moveTo(cos(a) * innerR, sin(a) * innerR)
+        ..lineTo(cos(aM) * outerR, sin(aM) * outerR)
+        ..lineTo(cos(aN) * innerR, sin(aN) * innerR);
       canvas.drawPath(path, paint);
     }
 
-    // Outer circle
-    if (layerProgress > 0.3) {
-      final op = ((layerProgress - 0.3) / 0.7).clamp(0.0, 1.0);
-      final circlePaint = Paint()
-        ..color = color.withValues(alpha: 0.15 * op)
+    if (lp > 0.3) {
+      final op = ((lp - 0.3) / 0.7).clamp(0.0, 1.0);
+      final cp = Paint()
+        ..color = color.withValues(alpha: 0.12 * op)
         ..style = PaintingStyle.stroke
         ..strokeWidth = sw * 0.5;
-      canvas.drawCircle(Offset.zero, outerR, circlePaint);
+      canvas.drawCircle(Offset.zero, outerR, cp);
     }
   }
 
-  /// Radiating lines from inner to outer radius
-  void _drawStarBurst(Canvas canvas, double innerR, double outerR, int count,
-      double layerProgress, double rotOffset, Color color, double sw) {
-    final angleStep = 2 * pi / count;
-    final linesToShow = (count * layerProgress).ceil();
+  // ── Star burst (radial lines) ──
+  void _drawStarBurst(Canvas canvas, double innerR, double outerR,
+      int count, double lp, double rotOff, Color color, double sw) {
+    final step = 2 * pi / count;
+    final show = (count * lp).ceil();
 
-    for (int i = 0; i < linesToShow; i++) {
-      final lineProgress =
-          i < linesToShow - 1 ? 1.0 : (layerProgress * count - i).clamp(0.0, 1.0);
-      final a = i * angleStep + rotOffset;
+    for (int i = 0; i < show; i++) {
+      final lineProg =
+          i < show - 1 ? 1.0 : (lp * count - i).clamp(0.0, 1.0);
+      final a = i * step + rotOff;
+      final effOuter = innerR + (outerR - innerR) * lineProg;
 
-      final effectiveOuter = innerR + (outerR - innerR) * lineProgress;
-
-      // Main line
-      final linePaint = Paint()
-        ..color = color.withValues(alpha: 0.4 * lineProgress)
+      final lPaint = Paint()
+        ..color = color.withValues(alpha: 0.4 * lineProg)
         ..style = PaintingStyle.stroke
         ..strokeWidth = sw
         ..strokeCap = StrokeCap.round;
 
       canvas.drawLine(
         Offset(cos(a) * innerR, sin(a) * innerR),
-        Offset(cos(a) * effectiveOuter, sin(a) * effectiveOuter),
-        linePaint,
+        Offset(cos(a) * effOuter, sin(a) * effOuter),
+        lPaint,
       );
 
-      // Small circle at the tip
-      if (lineProgress > 0.8) {
-        final dotPaint = Paint()
-          ..color = color.withValues(alpha: 0.5 * lineProgress)
+      if (lineProg > 0.8) {
+        final dp = Paint()
+          ..color = color.withValues(alpha: 0.5 * lineProg)
           ..style = PaintingStyle.fill;
         canvas.drawCircle(
-          Offset(cos(a) * effectiveOuter, sin(a) * effectiveOuter),
-          2.0,
-          dotPaint,
-        );
+            Offset(cos(a) * effOuter, sin(a) * effOuter), 2.0, dp);
       }
 
-      // Alternating shorter secondary lines
-      if (i % 2 == 0 && lineProgress > 0.3) {
-        final midA = a + angleStep / 2;
-        final secProgress = ((lineProgress - 0.3) / 0.7).clamp(0.0, 1.0);
-        final secOuter = innerR + (outerR - innerR) * 0.5 * secProgress;
-        final secPaint = Paint()
-          ..color = color.withValues(alpha: 0.2 * secProgress)
+      if (i % 2 == 0 && lineProg > 0.3) {
+        final mA = a + step / 2;
+        final sp = ((lineProg - 0.3) / 0.7).clamp(0.0, 1.0);
+        final so = innerR + (outerR - innerR) * 0.5 * sp;
+        final sPaint = Paint()
+          ..color = color.withValues(alpha: 0.2 * sp)
           ..style = PaintingStyle.stroke
           ..strokeWidth = sw * 0.6
           ..strokeCap = StrokeCap.round;
         canvas.drawLine(
-          Offset(cos(midA) * innerR, sin(midA) * innerR),
-          Offset(cos(midA) * secOuter, sin(midA) * secOuter),
-          secPaint,
+          Offset(cos(mA) * innerR, sin(mA) * innerR),
+          Offset(cos(mA) * so, sin(mA) * so),
+          sPaint,
         );
       }
     }
   }
 
-  /// Outermost decorative border with small arcs
-  void _drawOuterBorderRing(Canvas canvas, double innerR, double outerR,
-      int count, double layerProgress, double rotOffset, Color color, double sw) {
+  // ── Scalloped border ──
+  void _drawScallopedBorder(Canvas canvas, double innerR, double outerR,
+      int count, double lp, double rotOff, Color color, double sw) {
     final paint = Paint()
-      ..color = color.withValues(alpha: 0.35 * layerProgress)
+      ..color = color.withValues(alpha: 0.35 * lp)
       ..style = PaintingStyle.stroke
       ..strokeWidth = sw
       ..strokeCap = StrokeCap.round;
 
-    final angleStep = 2 * pi / count;
-    final arcsToShow = (count * layerProgress).ceil();
+    final step = 2 * pi / count;
+    final show = (count * lp).ceil();
 
-    for (int i = 0; i < arcsToShow; i++) {
-      final a = i * angleStep + rotOffset;
-      final aEnd = a + angleStep;
+    for (int i = 0; i < show; i++) {
+      final a = i * step + rotOff;
+      final aEnd = a + step;
       final aMid = (a + aEnd) / 2;
 
-      // Scalloped edge: arc that dips outward
       final p1 = Offset(cos(a) * innerR, sin(a) * innerR);
       final p2 = Offset(cos(aEnd) * innerR, sin(aEnd) * innerR);
-      final control = Offset(cos(aMid) * outerR, sin(aMid) * outerR);
+      final ctrl = Offset(cos(aMid) * outerR, sin(aMid) * outerR);
 
       final path = Path()
         ..moveTo(p1.dx, p1.dy)
-        ..quadraticBezierTo(control.dx, control.dy, p2.dx, p2.dy);
-
+        ..quadraticBezierTo(ctrl.dx, ctrl.dy, p2.dx, p2.dy);
       canvas.drawPath(path, paint);
     }
 
-    // Final closing circle
-    if (layerProgress > 0.6) {
-      final op = ((layerProgress - 0.6) / 0.4).clamp(0.0, 1.0);
-      final ringPaint = Paint()
-        ..color = color.withValues(alpha: 0.2 * op)
+    if (lp > 0.6) {
+      final op = ((lp - 0.6) / 0.4).clamp(0.0, 1.0);
+      final rp = Paint()
+        ..color = color.withValues(alpha: 0.18 * op)
         ..style = PaintingStyle.stroke
-        ..strokeWidth = sw * 0.5;
-      canvas.drawCircle(Offset.zero, innerR, ringPaint);
+        ..strokeWidth = sw * 0.4;
+      canvas.drawCircle(Offset.zero, innerR, rp);
     }
   }
 
-  /// Delicate arcs connecting layers — adds cohesion
-  void _drawConnectingArcs(Canvas canvas, double maxR, double p) {
+  // ── Connecting arcs at key radii ──
+  void _drawConnectingArcs(
+      Canvas canvas, double holeR, double bandW, double p) {
     final paint = Paint()
       ..style = PaintingStyle.stroke
-      ..strokeWidth = 0.6
+      ..strokeWidth = 0.5
       ..strokeCap = StrokeCap.round;
 
-    // Circles at key radii
-    final radii = [0.12, 0.22, 0.36, 0.50, 0.68, 0.82];
-    final thresholds = [0.08, 0.18, 0.30, 0.50, 0.65, 0.80];
+    final fractions = [0.08, 0.20, 0.34, 0.48, 0.62, 0.78, 0.90];
+    final thresholds = [0.06, 0.16, 0.28, 0.40, 0.54, 0.66, 0.82];
 
-    for (int i = 0; i < radii.length; i++) {
+    for (int i = 0; i < fractions.length; i++) {
       if (p > thresholds[i]) {
-        final layerP = ((p - thresholds[i]) / 0.12).clamp(0.0, 1.0);
-        paint.color = _goldMain.withValues(alpha: 0.12 * layerP);
+        final lp = ((p - thresholds[i]) / 0.12).clamp(0.0, 1.0);
+        paint.color = _kGoldMain.withValues(alpha: 0.10 * lp);
 
-        // Draw partial arc based on progress
-        final sweepAngle = 2 * pi * layerP;
-        final rect = Rect.fromCircle(
-          center: Offset.zero,
-          radius: maxR * radii[i],
-        );
-        canvas.drawArc(rect, rotation * (i.isEven ? 0.02 : -0.02),
-            sweepAngle, false, paint);
+        final r = holeR + bandW * fractions[i];
+        final sweep = 2 * pi * lp;
+        final rect = Rect.fromCircle(center: Offset.zero, radius: r);
+        canvas.drawArc(
+            rect, rotation * (i.isEven ? 0.02 : -0.02), sweep, false, paint);
       }
     }
   }
