@@ -5,6 +5,7 @@ import '../widgets/geometric_bg.dart';
 import 'home_screen.dart';
 import 'taqwim_screen.dart';
 import 'adhkar_tab_screen.dart';
+import 'duas_tab_screen.dart';
 import 'free_dhikr_screen.dart';
 import 'settings_screen.dart';
 
@@ -22,6 +23,7 @@ class _MainShellState extends State<MainShell> {
     HomeScreen(),
     TaqwimScreen(),
     AdhkarTabScreen(),
+    DuasTabScreen(),
     FreeDhikrScreen(),
     SettingsScreen(),
   ];
@@ -58,16 +60,16 @@ class _MainShellState extends State<MainShell> {
             backgroundColor: AppColors.card(context),
             selectedItemColor: accentGold,
             unselectedItemColor: AppColors.brownLightC(context),
-            selectedFontSize: 12,
-            unselectedFontSize: 11,
+            selectedFontSize: 11,
+            unselectedFontSize: 10,
             selectedLabelStyle: const TextStyle(
               fontFamily: 'Amiri',
-              fontSize: 12,
+              fontSize: 11,
               fontWeight: FontWeight.w700,
             ),
             unselectedLabelStyle: const TextStyle(
               fontFamily: 'Amiri',
-              fontSize: 11,
+              fontSize: 10,
               fontWeight: FontWeight.w400,
             ),
             elevation: 0,
@@ -94,17 +96,24 @@ class _MainShellState extends State<MainShell> {
                 accentGold: accentGold,
               ),
               _buildNavItem(
+                icon: Icons.auto_stories_outlined,
+                activeIcon: Icons.auto_stories,
+                label: 'الأدعية',
+                isActive: _currentIndex == 3,
+                accentGold: accentGold,
+              ),
+              _buildNavItem(
                 icon: Icons.edit_note_outlined,
                 activeIcon: Icons.edit_note,
                 label: 'الذكر الحر',
-                isActive: _currentIndex == 3,
+                isActive: _currentIndex == 4,
                 accentGold: accentGold,
               ),
               _buildNavItem(
                 icon: Icons.settings_outlined,
                 activeIcon: Icons.settings,
                 label: 'الإعدادات',
-                isActive: _currentIndex == 4,
+                isActive: _currentIndex == 5,
                 accentGold: accentGold,
               ),
             ],
@@ -127,7 +136,7 @@ class _MainShellState extends State<MainShell> {
       icon: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Icon(icon, size: 24),
+          Icon(icon, size: 22),
           const SizedBox(height: 2),
         ],
       ),
@@ -147,10 +156,10 @@ class _MainShellState extends State<MainShell> {
                   ),
                 ],
               ),
-              child: Icon(activeIcon, size: 26),
+              child: Icon(activeIcon, size: 24),
             )
           else
-            Icon(activeIcon, size: 26),
+            Icon(activeIcon, size: 24),
           const SizedBox(height: 2),
           Container(
             width: 4,
