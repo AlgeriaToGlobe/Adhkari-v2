@@ -2,8 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import '../data/dua_categories_data.dart';
 import '../theme/app_colors.dart';
+import '../widgets/accessibility_bar.dart';
 import '../widgets/arch_header.dart';
 import '../widgets/diamond_divider.dart';
+import '../widgets/geometric_bg.dart';
 
 /// Shows all duas within a selected category.
 class DuaCategoryDetailScreen extends StatelessWidget {
@@ -21,60 +23,110 @@ class DuaCategoryDetailScreen extends StatelessWidget {
       );
     }
 
+    final dark = AppColors.isDark(context);
+
     return Directionality(
       textDirection: TextDirection.rtl,
       child: Scaffold(
         backgroundColor: AppColors.scaffold(context),
-        body: Column(
-          children: [
-            // ── Header with back button ──
-            Stack(
-              children: [
-                ArchHeader(
-                  title: category.title,
-                  subtitle: category.subtitle,
-                ),
-                Positioned(
-                  top: 0,
-                  right: 0,
-                  child: SafeArea(
-                    child: IconButton(
-                      onPressed: () => Navigator.pop(context),
-                      icon: const Icon(
-                        Icons.arrow_forward_rounded,
-                        color: AppColors.white,
-                        size: 26,
+        body: GeometricBg(
+          child: CustomScrollView(
+            slivers: [
+              // ── Styled app bar (text doesn't scale) ──
+              SliverAppBar(
+                expandedHeight: 120,
+                floating: false,
+                pinned: true,
+                backgroundColor:
+                    dark ? AppColors.darkSurface : AppColors.brown,
+                foregroundColor:
+                    dark ? AppColors.darkTextPrimary : AppColors.white,
+                centerTitle: true,
+                flexibleSpace: MediaQuery(
+                  data: MediaQuery.of(context).copyWith(
+                    textScaler: TextScaler.noScaling,
+                  ),
+                  child: FlexibleSpaceBar(
+                    centerTitle: true,
+                    title: Text(
+                      category.title,
+                      style: TextStyle(
+                        fontFamily: 'Amiri',
+                        fontSize: 20,
+                        fontWeight: FontWeight.w700,
+                        color: dark
+                            ? AppColors.darkTextPrimary
+                            : AppColors.white,
+                      ),
+                    ),
+                    background: Container(
+                      decoration: BoxDecoration(
+                        gradient: dark
+                            ? AppColors.darkHeaderGradient
+                            : AppColors.headerGradient,
+                      ),
+                      child: Align(
+                        alignment: Alignment.bottomCenter,
+                        child: Padding(
+                          padding: const EdgeInsets.only(bottom: 52),
+                          child: Text(
+                            category.subtitle,
+                            textDirection: TextDirection.rtl,
+                            style: TextStyle(
+                              fontFamily: 'Amiri',
+                              fontSize: 13,
+                              color: dark
+                                  ? AppColors.darkTextSecondary
+                                  : AppColors.white
+                                      .withValues(alpha: 0.6),
+                            ),
+                          ),
+                        ),
                       ),
                     ),
                   ),
                 ),
-              ],
-            ),
-
-            // ── Duas list ──
-            Expanded(
-              child: ListView.builder(
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-                itemCount: category.duas.length,
-                itemBuilder: (context, index) {
-                  final dua = category.duas[index];
-                  final isLast = index == category.duas.length - 1;
-
-                  return Column(
-                    children: [
-                      _DuaDetailCard(
-                        dua: dua,
-                        index: index + 1,
-                        total: category.duas.length,
-                      ),
-                      if (!isLast) const DiamondDivider(),
-                    ],
-                  );
-                },
               ),
-            ),
-          ],
+
+              // ── Accessibility bar (font size + dark mode) ──
+              const SliverToBoxAdapter(
+                child: AccessibilityBar(),
+              ),
+
+              // ── Duas list with diamond dividers ──
+              SliverList(
+                delegate: SliverChildBuilderDelegate(
+                  (context, index) {
+                    final itemIndex = index ~/ 2;
+                    if (index.isEven) {
+                      final dua = category.duas[itemIndex];
+                      return Padding(
+                        padding: EdgeInsets.only(
+                          top: itemIndex == 0 ? 16 : 0,
+                          bottom: itemIndex == category.duas.length - 1
+                              ? 32
+                              : 0,
+                        ),
+                        child: _DuaDetailCard(
+                          dua: dua,
+                          index: itemIndex + 1,
+                          total: category.duas.length,
+                        ),
+                      );
+                    } else {
+                      return const DiamondDivider();
+                    }
+                  },
+                  childCount: category.duas.length * 2 - 1,
+                ),
+              ),
+
+              // ── Bottom padding ──
+              const SliverToBoxAdapter(
+                child: SizedBox(height: 32),
+              ),
+            ],
+          ),
         ),
       ),
     );
@@ -98,16 +150,19 @@ class _DuaDetailCard extends StatelessWidget {
     final accentGold = AppColors.goldC(context);
 
     return Container(
+      margin: const EdgeInsets.symmetric(horizontal: 20),
       decoration: BoxDecoration(
         color: AppColors.card(context),
-        borderRadius: BorderRadius.circular(AppColors.radiusM),
+        borderRadius: BorderRadius.circular(20),
         border: Border.all(
-          color: AppColors.dividerC(context).withValues(alpha: 0.6),
+          color: dark
+              ? Colors.white.withValues(alpha: 0.08)
+              : AppColors.dividerC(context).withValues(alpha: 0.6),
           width: 1,
         ),
         boxShadow: AppColors.cardShadow(context),
       ),
-      padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 24),
+      padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 28),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
