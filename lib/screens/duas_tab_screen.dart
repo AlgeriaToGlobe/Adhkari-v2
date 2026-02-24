@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import '../data/dua_categories_data.dart';
 import '../theme/app_colors.dart';
 import '../utils/page_transitions.dart';
+import '../widgets/accessibility_bar.dart';
 import '../widgets/arch_header.dart';
 import 'dua_category_detail_screen.dart';
 
@@ -28,7 +29,10 @@ class DuasTabScreen extends StatelessWidget {
               subtitle: 'أدعية مأثورة من القرآن والسنة',
             ),
 
-            const SizedBox(height: 8),
+            // ── Accessibility bar (font size + dark mode) ──
+            const AccessibilityBar(),
+
+            const SizedBox(height: 4),
 
             // ── Category list ──
             Expanded(
